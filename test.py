@@ -40,7 +40,7 @@ class APITest(unittest.TestCase):
         self.check_response(latest, url)
     
     def test_bills_by_member(self):
-        farr_bills = self.congress.bills.by_member('F000030')
+        farr_bills = self.congress.bills.by_member('F000030', 'introduced')
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/members/F000030/bills/introduced.json?api-key=%s" % API_KEY
         self.check_response(latest, url)
         
