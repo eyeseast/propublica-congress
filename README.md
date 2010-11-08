@@ -20,3 +20,22 @@ Usage
     
     # get member by bioguide ID
     >>> pelosi = congress.members.get('P000197')
+    >>> pelosi['twitter_id']
+    'NancyPelosi'
+    
+    # get recent House bills
+    # recent bills come in two types: 'introduced' and 'updated'
+    >>> introd = congress.bills.recent(chamber='house', congress=111, type='introduced')
+    >>> len(introd['bills'])
+    20
+    >>> introd['chamber']
+    'House'
+    
+    # or use a convenience function
+    >>> introd = congress.bills.introduced('house')
+    >>> introd['chamber']
+    'House'
+    >>> len(introd['bills'])
+    20
+    
+    
