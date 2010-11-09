@@ -2,6 +2,7 @@
 A Python client for the New York Times Congress API
 """
 import datetime
+import httplib2
 import os
 import urllib
 import urllib2
@@ -29,6 +30,7 @@ class Client(object):
     
     def __init__(self, apikey):
         self.apikey = apikey
+        self.http = httplib2.Http('.cache')
     
     def fetch(self, path, *args, **kwargs):
         parse = kwargs.pop('parse', lambda r: r['results'])
@@ -37,8 +39,8 @@ class Client(object):
         url = self.BASE_URI + "%s.json?" % path
         url = (url % args) + urllib.urlencode(kwargs)
         
-        resp = urllib2.urlopen(url)
-        result = json.load(resp)
+        resp, content = self.http.request(url)
+        result = json.loads(content)
         
         if callable(parse):
             result = parse(result)
