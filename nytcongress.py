@@ -102,9 +102,9 @@ class BillsClient(Client):
 
 class NytCongress(object):
     
-    def __init__(self, apikey):
-        self.apikey = apikey
-        self.members = MembersClient(apikey)
-        self.bills = BillsClient(apikey)
+    def __init__(self, apikey=None):
+        self.apikey = apikey or os.environ.get('NYT_CONGRESS_API_KEY')
+        self.members = MembersClient(self.apikey)
+        self.bills = BillsClient(self.apikey)
     
 
