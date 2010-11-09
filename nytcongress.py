@@ -80,6 +80,11 @@ class BillsClient(Client):
         result = self.fetch(path, member_id, type)
         return result
     
+    def get(self, bill_id, congress=CURRENT_CONGRESS):
+        path = "%s/bills/%s"
+        result = self.fetch(path, congress, bill_id, parse=lambda r: r['results'][0])
+        return result
+    
     def recent(self, chamber, congress=CURRENT_CONGRESS, type='introduced'):
         "Takes a chamber, Congress, and type (introduced|updated), returns a list of recent bills"
         path = "%s/%s/bills/%s"

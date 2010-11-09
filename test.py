@@ -44,7 +44,11 @@ class APITest(unittest.TestCase):
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/members/F000030/bills/introduced.json?api-key=%s" % API_KEY
         self.check_response(farr_bills, url)
         
-    
+    def test_bill_detail(self):
+        hr1 = self.congress.bills.get('hr1', 111)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/bills/hr1.json?api-key=%s" % API_KEY
+        self.check_response(hr1, url, lambda r: r['results'][0])
+
 
 class UtilTest(unittest.TestCase):
 
