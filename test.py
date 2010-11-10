@@ -2,6 +2,7 @@
 
 import json
 import os
+import time
 import urllib
 import urllib2
 import unittest
@@ -12,7 +13,7 @@ API_KEY = os.environ['NYT_CONGRESS_API_KEY']
 
 class APITest(unittest.TestCase):
     
-    def check_response(self, result, url, parse=lambda r: r['results']):
+    def check_response(self, result, url, parse=lambda r: r['results'][0]):
         
         response = json.load(urllib2.urlopen(url))
         
@@ -23,11 +24,12 @@ class APITest(unittest.TestCase):
     
     def setUp(self):
         self.congress = NytCongress(API_KEY)
+        time.sleep(.5)
     
     def test_get_member(self):
         pelosi = self.congress.members.get('P000197')
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/members/P000197.json?api-key=%s" % API_KEY
-        self.check_response(pelosi, url, lambda r: r['results'][0])
+        self.check_response(pelosi, url)
     
     def test_filter_members(self):
         ca = self.congress.members.filter(chamber='house', state='CA', congress=111)
@@ -47,7 +49,7 @@ class APITest(unittest.TestCase):
     def test_bill_detail(self):
         hr1 = self.congress.bills.get('hr1', 111)
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/bills/hr1.json?api-key=%s" % API_KEY
-        self.check_response(hr1, url, lambda r: r['results'][0])
+        self.check_response(hr1, url)
 
 
 class UtilTest(unittest.TestCase):

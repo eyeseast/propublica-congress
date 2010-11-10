@@ -13,6 +13,8 @@ try:
 except ImportError:
     import simplejson as json
 
+__all__ = ('NytCongress', 'NytCongressError', 'get_congress')
+
 def get_congress(year):
     "Return the Congress number for a given year"
     return (year - 1789) / 2 + 1
@@ -28,12 +30,12 @@ class Client(object):
 
     BASE_URI = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
     
-    def __init__(self, apikey):
+    def __init__(self, apikey, cache='.cache'):
         self.apikey = apikey
-        self.http = httplib2.Http('.cache')
+        self.http = httplib2.Http(cache)
     
     def fetch(self, path, *args, **kwargs):
-        parse = kwargs.pop('parse', lambda r: r['results'])
+        parse = kwargs.pop('parse', lambda r: r['results'][0])
         kwargs['api-key'] = self.apikey
         
         url = self.BASE_URI + "%s.json?" % path
@@ -57,7 +59,7 @@ class MembersClient(Client):
     def get(self, member_id):
         "Takes a bioguide_id, returns a legislator"
         path = "members/%s"
-        result = self.fetch(path, member_id, parse=lambda r: r['results'][0])
+        result = self.fetch(path, member_id)
         return result
     
     def filter(self, chamber, congress=CURRENT_CONGRESS, **kwargs):
@@ -82,7 +84,7 @@ class BillsClient(Client):
     
     def get(self, bill_id, congress=CURRENT_CONGRESS):
         path = "%s/bills/%s"
-        result = self.fetch(path, congress, bill_id, parse=lambda r: r['results'][0])
+        result = self.fetch(path, congress, bill_id)
         return result
     
     def recent(self, chamber, congress=CURRENT_CONGRESS, type='introduced'):
@@ -101,10 +103,24 @@ class BillsClient(Client):
     
 
 class NytCongress(object):
+    """
+    Implements the public interface for the NYT Congress API
     
-    def __init__(self, apikey=None):
+    Methods are namespaced by topic (though some have multiple access points).
+    Everything returns decoded JSON, with fat trimmed.
+    
+    Create a new instance with your API key, or set an environment
+    variable called NYT_CONGRESS_API_KEY.
+    
+    NytCongress uses httplib2, and caching is pluggable. By default,
+    it uses httplib2.FileCache, in a directory called .cache, but it
+    should also work with memcache or anything else that exposes the
+    same interface as FileCache (per httplib2 docs).
+    """
+    
+    def __init__(self, apikey=None, cache='.cache'):
         self.apikey = apikey or os.environ.get('NYT_CONGRESS_API_KEY')
-        self.members = MembersClient(self.apikey)
-        self.bills = BillsClient(self.apikey)
+        self.members = MembersClient(self.apikey, cache)
+        self.bills = BillsClient(self.apikey, cache)
     
 
