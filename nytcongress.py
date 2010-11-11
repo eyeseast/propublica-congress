@@ -1,6 +1,9 @@
 """
 A Python client for the New York Times Congress API
 """
+__author__ = "Chris Amico (eyeseast@gmail.com)"
+__version__ = "0.1.0"
+
 import datetime
 import httplib2
 import os
