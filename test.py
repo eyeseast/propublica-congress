@@ -26,6 +26,8 @@ class APITest(unittest.TestCase):
         self.congress = NytCongress(API_KEY)
         time.sleep(.5)
     
+class MemberTest(APITest):
+
     def test_get_member(self):
         pelosi = self.congress.members.get('P000197')
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/members/P000197.json?api-key=%s" % API_KEY
@@ -35,6 +37,8 @@ class APITest(unittest.TestCase):
         ca = self.congress.members.filter(chamber='house', state='CA', congress=111)
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/house/members.json?&state=ca&api-key=%s" % API_KEY
         self.check_response(ca, url)
+
+class BillTest(APITest):
     
     def test_recent_bills(self):
         latest = self.congress.bills.recent(chamber='house', congress=111, type='introduced')
@@ -61,6 +65,12 @@ class APITest(unittest.TestCase):
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/bills/hr1.json?api-key=%s" % API_KEY
         self.check_response(hr1, url)
 
+class ClientTest(APITest):
+
+    def test_generic_fetch(self):
+        hr1 = self.congress.bills.get('hr1', 111)
+        hr1_generic = self.congress.fetch('http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/bills/hr1.json')
+        self.assertEqual(hr1, hr1_generic)
 
 class UtilTest(unittest.TestCase):
 

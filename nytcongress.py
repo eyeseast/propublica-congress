@@ -41,9 +41,12 @@ class Client(object):
         parse = kwargs.pop('parse', lambda r: r['results'][0])
         kwargs['api-key'] = self.apikey
         
-        url = self.BASE_URI + "%s.json?" % path
-        url = (url % args) + urllib.urlencode(kwargs)
-        
+        if not path.lower().startswith(self.BASE_URI):
+            url = self.BASE_URI + "%s.json?" % path
+            url = (url % args) + urllib.urlencode(kwargs)
+        else:
+            url = path + '?' + urllib.urlencode(kwargs)
+            
         resp, content = self.http.request(url)
         result = json.loads(content)
         
@@ -105,12 +108,17 @@ class BillsClient(Client):
         return self.recent(chamber, congress, 'updated')
     
 
-class NytCongress(object):
+class NytCongress(Client):
     """
     Implements the public interface for the NYT Congress API
     
     Methods are namespaced by topic (though some have multiple access points).
     Everything returns decoded JSON, with fat trimmed.
+    
+    In addition, the top-level namespace is itself a client, which
+    can be used to fetch generic resources, using the API URIs included
+    in responses. This is here so you don't have to write separate
+    functions that add on your API key and trim fat off responses.
     
     Create a new instance with your API key, or set an environment
     variable called NYT_CONGRESS_API_KEY.
@@ -121,8 +129,8 @@ class NytCongress(object):
     same interface as FileCache (per httplib2 docs).
     """
     
-    def __init__(self, apikey=None, cache='.cache'):
-        self.apikey = apikey or os.environ.get('NYT_CONGRESS_API_KEY')
+    def __init__(self, apikey=os.environ.get('NYT_CONGRESS_API_KEY'), cache='.cache'):
+        super(NytCongress, self).__init__(apikey, cache)
         self.members = MembersClient(self.apikey, cache)
         self.bills = BillsClient(self.apikey, cache)
     
