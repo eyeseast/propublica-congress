@@ -53,13 +53,7 @@ class Client(object):
         if callable(parse):
             result = parse(result)
         return result
-    
-    @property
-    def _key(self):
-        "Here for convenience"
-        return urllib.urlencode({'api-key': self.apikey})
-    
-
+        
 class MembersClient(Client):
     
     def get(self, member_id):
