@@ -98,11 +98,11 @@ class BillsClient(Client):
     
     def introduced(self, chamber, congress=CURRENT_CONGRESS):
         "Shortcut for getting introduced bills"
-        return self.recent(congress, chamber, 'introduced')
+        return self.recent(chamber, congress, 'introduced')
     
     def updated(self, chamber, congress=CURRENT_CONGRESS):
         "Shortcut for getting updated bills"
-        return self.recent(congress, chamber, 'updated')
+        return self.recent(chamber, congress, 'updated')
     
 
 class NytCongress(object):
