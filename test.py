@@ -65,6 +65,11 @@ class BillTest(APITest):
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/bills/hr1.json?api-key=%s" % API_KEY
         self.check_response(hr1, url)
     
+    def test_bill_amendments(self):
+        hr1 = self.congress.bills.amendments('hr1', 111)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/bills/hr1/amendments.json?api-key=%s" % API_KEY
+        self.check_response(hr1, url)
+    
     def test_bill_subjects(self):
         hr1 = self.congress.bills.subjects('hr1', 111)
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/bills/hr1/subjects.json?api-key=%s" % API_KEY

@@ -87,6 +87,11 @@ class BillsClient(Client):
         result = self.fetch(path, congress, bill_id)
         return result
     
+    def amendments(self, bill_id, congress=CURRENT_CONGRESS):
+        path = "%s/bills/%s/amendments"
+        result = self.fetch(path, congress, bill_id)
+        return result
+    
     def related(self, bill_id, congress=CURRENT_CONGRESS):
         path = "%s/bills/%s/related"
         result = self.fetch(path, congress, bill_id)
