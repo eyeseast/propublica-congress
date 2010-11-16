@@ -6,6 +6,8 @@
 *.egg-info
 dist
 build
+MANIFEST
+.DS_Store
 
 # Installer logs
 pip-log.txt

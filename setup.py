@@ -14,7 +14,7 @@ setup(
     author_email = "eyeseast@gmail.com",
     py_modules = ['nytcongress'],
     platforms=["any"],
-    classifiers=["Development Status :: %s - Alpha" % nytcongress.__version__,
+    classifiers=[
                  "Intended Audience :: Developers",
                  "License :: OSI Approved :: BSD License",
                  "Natural Language :: English",
