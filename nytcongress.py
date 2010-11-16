@@ -116,6 +116,17 @@ class BillsClient(Client):
         "Shortcut for getting updated bills"
         return self.recent(chamber, congress, 'updated')
     
+class CommitteesClient(Client):
+    
+    def filter(self, chamber, congress=CURRENT_CONGRESS):
+        path = "%s/%s/committees"
+        result = self.fetch(path, congress, chamber)
+        return result
+    
+    def get(self, chamber, committee_id, congress=CURRENT_CONGRESS):
+        path = "%s/%s/committees/%s"
+        result = self.fetch(path, congress, chamber, committee_id)
+        return result
 
 class NytCongress(Client):
     """
@@ -142,5 +153,6 @@ class NytCongress(Client):
         super(NytCongress, self).__init__(apikey, cache)
         self.members = MembersClient(self.apikey, cache)
         self.bills = BillsClient(self.apikey, cache)
+        self.committees = CommitteesClient(self.apikey, cache)
     
 

@@ -80,6 +80,22 @@ class BillTest(APITest):
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/bills/hr1/related.json?api-key=%s" % API_KEY
         self.check_response(hr1, url)
 
+class CommitteeTest(APITest):
+    
+    def test_committee_list(self):
+        house = self.congress.committees.filter('house', 111)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/house/committees.json?api-key=%s" % API_KEY
+        self.check_response(house, url)
+        
+        senate = self.congress.committees.filter('senate', 111)
+        url2 = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/senate/committees.json?api-key=%s" % API_KEY
+        self.check_response(senate, url2)
+    
+    def test_committee_detail(self):
+        hsba = self.congress.committees.get('house', 'hsba', 111)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/house/committees/HSBA.json?api-key=%s" % API_KEY
+        self.check_response(hsba, url)
+
 class ClientTest(APITest):
 
     def test_generic_fetch(self):
