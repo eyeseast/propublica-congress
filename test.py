@@ -37,6 +37,11 @@ class MemberTest(APITest):
         ca = self.congress.members.filter(chamber='house', state='CA', congress=111)
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/house/members.json?&state=ca&api-key=%s" % API_KEY
         self.check_response(ca, url)
+    
+    def test_new_members(self):
+        new = self.congress.members.new()
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/members/new.json?api-key=%s" % API_KEY
+        self.check_response(new, url)
 
 class BillTest(APITest):
     

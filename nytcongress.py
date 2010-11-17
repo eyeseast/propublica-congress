@@ -73,6 +73,12 @@ class MembersClient(Client):
         path = "members/%s/bills/%s"
         result = self.fetch(path, member_id, type)
         return result
+    
+    def new(self, **kwargs):
+        "Returns a list of new members"
+        path = "members/new"
+        result = self.fetch(path, **kwargs)
+        return result
 
 class BillsClient(Client):
     
