@@ -8,8 +8,6 @@ import datetime
 import httplib2
 import os
 import urllib
-import urllib2
-import urlparse
 
 try:
     import json
@@ -17,6 +15,8 @@ except ImportError:
     import simplejson as json
 
 __all__ = ('NytCongress', 'NytCongressError', 'get_congress')
+
+DEBUG = False
 
 def get_congress(year):
     "Return the Congress number for a given year"
@@ -65,6 +65,8 @@ class Client(object):
         
         if callable(parse):
             result = parse(result)
+            if DEBUG:
+                result['_url'] = url
         return result
         
 class MembersClient(Client):
@@ -132,9 +134,14 @@ class BillsClient(Client):
 class VotesClient(Client):
     
     def by_month(self, chamber, year=None, month=None):
+        if not str(chamber).lower() in ('house', 'senate'):
+            raise TypeError("by_month() requires chamber, year and month. Got %s, %s, %s" \
+                % (chamber, year, month))
+
         now = datetime.datetime.now()
         year = year or now.year
         month = month or now.month
+
         path = "%s/votes/%s/%s"
         result = self.fetch(path, chamber, year, month, parse=lambda r: r['results'])
         return result

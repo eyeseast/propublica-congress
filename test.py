@@ -8,7 +8,7 @@ import urllib
 import urllib2
 import unittest
 
-from nytcongress import NytCongress, get_congress
+from nytcongress import NytCongress, NytCongressError, get_congress
 
 API_KEY = os.environ['NYT_CONGRESS_API_KEY']
 
@@ -25,7 +25,7 @@ class APITest(unittest.TestCase):
     
     def setUp(self):
         self.congress = NytCongress(API_KEY)
-        time.sleep(.5)
+        #time.sleep(.5)
     
 class MemberTest(APITest):
 
@@ -124,6 +124,12 @@ class ClientTest(APITest):
         hr1 = self.congress.bills.get('hr1', 111)
         hr1_generic = self.congress.fetch('http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/bills/hr1.json')
         self.assertEqual(hr1, hr1_generic)
+
+class ErrorTest(APITest):
+    
+    def test_bad_vote_args(self):
+        # this needs a chamber argument
+        self.assertRaises(TypeError, self.congress.votes.by_month, 2010, 11)
 
 class UtilTest(unittest.TestCase):
 
