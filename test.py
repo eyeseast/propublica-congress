@@ -25,7 +25,7 @@ class APITest(unittest.TestCase):
     
     def setUp(self):
         self.congress = NytCongress(API_KEY)
-        #time.sleep(.5)
+        time.sleep(.5)
     
 class MemberTest(APITest):
 
@@ -116,6 +116,13 @@ class VoteTest(APITest):
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/" \
               "congress/house/votes/%(today)s/%(today)s.json?api-key=%(key)s" \
                   % {'today': today.strftime('%Y-%m-%d'), 'key': API_KEY}
+        self.check_response(votes, url, parse=lambda r: r['results'])
+    
+    def test_votes_by_date(self):
+        june14 = datetime.date(2010, 6, 14)
+        votes = self.congress.votes.by_date('house', june14)
+        url = ("http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
+               "house/votes/2010-06-14/2010-06-14.json?api-key=%s" % API_KEY)
         self.check_response(votes, url, parse=lambda r: r['results'])
 
 class ClientTest(APITest):

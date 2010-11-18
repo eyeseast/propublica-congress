@@ -147,13 +147,22 @@ class VotesClient(Client):
         return result
     
     def by_range(self, chamber, start, end):
+        """\
+        Return votes cast in a chamber between two dates,
+        up to one month apart.
+        """
         start, end = parse_date(start), parse_date(end)
         format = "%Y-%m-%d"
         path = "%s/votes/%s/%s"
         result = self.fetch(path, chamber, start.strftime(format), end.strftime(format), 
             parse=lambda r: r['results'])
         return result
-   
+    
+    def by_date(self, chamber, date):
+        "Return votes cast in a chamber on a single day"
+        date = parse_date(date)
+        return self.by_range(chamber, date, date)
+    
     def today(self, chamber):
         now = datetime.date.today()
         return self.by_range(chamber, now, now)
