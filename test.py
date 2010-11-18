@@ -110,6 +110,14 @@ class VoteTest(APITest):
             % API_KEY
         self.check_response(sept, url, parse=lambda r: r['results'])
     
+    def test_votes_by_reversed_range(self):
+        today = datetime.date.today()
+        last_week = today - datetime.timedelta(days=7)
+        self.assertEqual(
+            self.congress.votes.by_range('house', today, last_week),
+            self.congress.votes.by_range('house', last_week, today)
+        )
+    
     def test_votes_today(self):
         today = datetime.datetime.today()
         votes = self.congress.votes.today('house')
@@ -124,7 +132,13 @@ class VoteTest(APITest):
         url = ("http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
                "house/votes/2010-06-14/2010-06-14.json?api-key=%s" % API_KEY)
         self.check_response(votes, url, parse=lambda r: r['results'])
-
+    
+    def test_vote_rollcall(self):
+        vote = self.congress.votes.get('house', 580, 2, 111)
+        url = ("http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
+               "111/house/sessions/2/votes/580.json?api-key=%s" % API_KEY)
+        self.check_response(vote, url, parse=lambda r: r['results'])
+    
 class ClientTest(APITest):
 
     def test_generic_fetch(self):

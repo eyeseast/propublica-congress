@@ -133,7 +133,11 @@ class BillsClient(Client):
 
 class VotesClient(Client):
     
+    # date-based queries
     def by_month(self, chamber, year=None, month=None):
+        """
+        Return votes for a single month, defaulting to the current month.
+        """
         if not str(chamber).lower() in ('house', 'senate'):
             raise TypeError("by_month() requires chamber, year and month. Got %s, %s, %s" \
                 % (chamber, year, month))
@@ -152,6 +156,8 @@ class VotesClient(Client):
         up to one month apart.
         """
         start, end = parse_date(start), parse_date(end)
+        if start > end:
+            start, end = end, start
         format = "%Y-%m-%d"
         path = "%s/votes/%s/%s"
         result = self.fetch(path, chamber, start.strftime(format), end.strftime(format), 
@@ -164,8 +170,17 @@ class VotesClient(Client):
         return self.by_range(chamber, date, date)
     
     def today(self, chamber):
+        "Return today's votes in a given chamber"
         now = datetime.date.today()
         return self.by_range(chamber, now, now)
+    
+    # detail response
+    def get(self, chamber, rollcall_num, session, congress=CURRENT_CONGRESS):
+        path = "%s/%s/sessions/%s/votes/%s"
+        result = self.fetch(path, congress, chamber, session, rollcall_num,
+            parse=lambda r: r['results'])
+        return result
+        
 
 class CommitteesClient(Client):
     
