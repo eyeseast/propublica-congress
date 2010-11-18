@@ -180,7 +180,29 @@ class VotesClient(Client):
         result = self.fetch(path, congress, chamber, session, rollcall_num,
             parse=lambda r: r['results'])
         return result
-        
+    
+    # votes by type
+    def by_type(self, chamber, vote_type, congress=CURRENT_CONGRESS):
+        "Return votes by type: missed, party, lone no, perfect"
+        path = "%s/%s/votes/%s"
+        result = self.fetch(path, congress, chamber, vote_type)
+        return result
+    
+    def missed(self, chamber, congress=CURRENT_CONGRESS):
+        "Missed votes by member"
+        return self.by_type(chamber, 'missed', congress)
+    
+    def party(self, chamber, congress=CURRENT_CONGRESS):
+        "How often does each member vote with their party?"
+        return self.by_type(chamber, 'party', congress)
+    
+    def loneno(self, chamber, congress=CURRENT_CONGRESS):
+        "How often is each member the lone no vote?"
+        return self.by_type(chamber, 'loneno', congress)
+    
+    def perfect(self, chamber, congress=CURRENT_CONGRESS):
+        "Who never misses a vote?"
+        return self.by_type(chamber, 'perfect', congress)
 
 class CommitteesClient(Client):
     

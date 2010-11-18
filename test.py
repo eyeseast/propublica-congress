@@ -139,6 +139,36 @@ class VoteTest(APITest):
                "111/house/sessions/2/votes/580.json?api-key=%s" % API_KEY)
         self.check_response(vote, url, parse=lambda r: r['results'])
     
+    def test_votes_by_type(self):
+        missed = self.congress.votes.by_type('house', 'missed', 111)
+        url = ("http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
+               "111/house/votes/missed.json?api-key=%s" % API_KEY)
+        self.check_response(missed, url)
+    
+    def test_missed_votes(self):
+        missed = self.congress.votes.missed('house', 111)
+        url = ("http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
+               "111/house/votes/missed.json?api-key=%s" % API_KEY)
+        self.check_response(missed, url)
+    
+    def test_party_votes(self):
+        party = self.congress.votes.party('house', 111)
+        url = ("http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
+               "111/house/votes/party.json?api-key=%s" % API_KEY)
+        self.check_response(party, url)
+    
+    def test_loneno_votes(self):
+        lonenos = self.congress.votes.loneno('house', 111)
+        url = ("http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
+               "111/house/votes/loneno.json?api-key=%s" % API_KEY)
+        self.check_response(lonenos, url)
+    
+    def test_perfect_voters(self):
+        perfects = self.congress.votes.perfect('house', 111)
+        url = ("http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
+               "111/house/votes/perfect.json?api-key=%s" % API_KEY)
+        self.check_response(perfects, url)
+    
 class ClientTest(APITest):
 
     def test_generic_fetch(self):
