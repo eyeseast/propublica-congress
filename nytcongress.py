@@ -22,6 +22,19 @@ def get_congress(year):
     "Return the Congress number for a given year"
     return (year - 1789) / 2 + 1
 
+def parse_date(s):
+    """
+    Parse a date using dateutil.parser.parse if available,
+    falling back to datetime.datetime.strptime if not
+    """
+    if isinstance(s, (datetime.datetime, datetime.date)):
+        return s
+    try:
+        from dateutil.parser import parse
+    except ImportError:
+        parse = lambda d: datetime.datetime.strptime(d, "%Y-%m-%d")
+    return parse(s)
+
 CURRENT_CONGRESS = get_congress(datetime.datetime.now().year)
 
 class NytCongressError(Exception):
@@ -115,7 +128,29 @@ class BillsClient(Client):
     def updated(self, chamber, congress=CURRENT_CONGRESS):
         "Shortcut for getting updated bills"
         return self.recent(chamber, congress, 'updated')
+
+class VotesClient(Client):
     
+    def by_month(self, chamber, year=None, month=None):
+        now = datetime.datetime.now()
+        year = year or now.year
+        month = month or now.month
+        path = "%s/votes/%s/%s"
+        result = self.fetch(path, chamber, year, month, parse=lambda r: r['results'])
+        return result
+    
+    def by_range(self, chamber, start, end):
+        start, end = parse_date(start), parse_date(end)
+        format = "%Y-%m-%d"
+        path = "%s/votes/%s/%s"
+        result = self.fetch(path, chamber, start.strftime(format), end.strftime(format), 
+            parse=lambda r: r['results'])
+        return result
+   
+    def today(self, chamber):
+        now = datetime.date.today()
+        return self.by_range(chamber, now, now)
+
 class CommitteesClient(Client):
     
     def filter(self, chamber, congress=CURRENT_CONGRESS):
@@ -154,5 +189,6 @@ class NytCongress(Client):
         self.members = MembersClient(self.apikey, cache)
         self.bills = BillsClient(self.apikey, cache)
         self.committees = CommitteesClient(self.apikey, cache)
+        self.votes = VotesClient(self.apikey, cache)
     
 

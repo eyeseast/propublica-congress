@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import datetime
 import json
 import os
 import time
@@ -95,6 +96,27 @@ class CommitteeTest(APITest):
         hsba = self.congress.committees.get('house', 'hsba', 111)
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/house/committees/HSBA.json?api-key=%s" % API_KEY
         self.check_response(hsba, url)
+
+class VoteTest(APITest):
+    
+    def test_votes_by_month(self):
+        jan = self.congress.votes.by_month('house', 2010, 1)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/house/votes/2010/01.json?api-key=%s" % API_KEY
+        self.check_response(jan, url, parse=lambda r: r['results'])
+    
+    def test_votes_by_date_range(self):
+        sept = self.congress.votes.by_range('house', datetime.date(2010, 9, 1), datetime.date(2010, 9, 30))
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/house/votes/2010-09-1/2010-09-30.json?api-key=%s" \
+            % API_KEY
+        self.check_response(sept, url, parse=lambda r: r['results'])
+    
+    def test_votes_today(self):
+        today = datetime.datetime.today()
+        votes = self.congress.votes.today('house')
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/" \
+              "congress/house/votes/%(today)s/%(today)s.json?api-key=%(key)s" \
+                  % {'today': today.strftime('%Y-%m-%d'), 'key': API_KEY}
+        self.check_response(votes, url, parse=lambda r: r['results'])
 
 class ClientTest(APITest):
 
