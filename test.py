@@ -169,6 +169,11 @@ class VoteTest(APITest):
                "111/house/votes/perfect.json?api-key=%s" % API_KEY)
         self.check_response(perfects, url)
     
+    def test_nominations(self):
+        nom_votes = self.congress.votes.nominations(111)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominations.json?api-key=%s" % API_KEY
+        self.check_response(nom_votes, url)
+    
 class ClientTest(APITest):
 
     def test_generic_fetch(self):

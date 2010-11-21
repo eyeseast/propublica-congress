@@ -203,6 +203,12 @@ class VotesClient(Client):
     def perfect(self, chamber, congress=CURRENT_CONGRESS):
         "Who never misses a vote?"
         return self.by_type(chamber, 'perfect', congress)
+    
+    def nominations(self, congress=CURRENT_CONGRESS):
+        "Return votes on nominations from a given Congress"
+        path = "%s/nominations"
+        result = self.fetch(path, congress)
+        return result
 
 class CommitteesClient(Client):
     
