@@ -8,8 +8,6 @@ import datetime
 import httplib2
 import os
 import urllib
-import urllib2
-import urlparse
 
 try:
     import json
@@ -18,9 +16,24 @@ except ImportError:
 
 __all__ = ('NytCongress', 'NytCongressError', 'get_congress')
 
+DEBUG = False
+
 def get_congress(year):
     "Return the Congress number for a given year"
     return (year - 1789) / 2 + 1
+
+def parse_date(s):
+    """
+    Parse a date using dateutil.parser.parse if available,
+    falling back to datetime.datetime.strptime if not
+    """
+    if isinstance(s, (datetime.datetime, datetime.date)):
+        return s
+    try:
+        from dateutil.parser import parse
+    except ImportError:
+        parse = lambda d: datetime.datetime.strptime(d, "%Y-%m-%d")
+    return parse(s)
 
 CURRENT_CONGRESS = get_congress(datetime.datetime.now().year)
 
@@ -52,6 +65,8 @@ class Client(object):
         
         if callable(parse):
             result = parse(result)
+            if DEBUG:
+                result['_url'] = url
         return result
         
 class MembersClient(Client):
@@ -121,7 +136,86 @@ class BillsClient(Client):
     def updated(self, chamber, congress=CURRENT_CONGRESS):
         "Shortcut for getting updated bills"
         return self.recent(chamber, congress, 'updated')
+
+class VotesClient(Client):
     
+    # date-based queries
+    def by_month(self, chamber, year=None, month=None):
+        """
+        Return votes for a single month, defaulting to the current month.
+        """
+        if not str(chamber).lower() in ('house', 'senate'):
+            raise TypeError("by_month() requires chamber, year and month. Got %s, %s, %s" \
+                % (chamber, year, month))
+
+        now = datetime.datetime.now()
+        year = year or now.year
+        month = month or now.month
+
+        path = "%s/votes/%s/%s"
+        result = self.fetch(path, chamber, year, month, parse=lambda r: r['results'])
+        return result
+    
+    def by_range(self, chamber, start, end):
+        """\
+        Return votes cast in a chamber between two dates,
+        up to one month apart.
+        """
+        start, end = parse_date(start), parse_date(end)
+        if start > end:
+            start, end = end, start
+        format = "%Y-%m-%d"
+        path = "%s/votes/%s/%s"
+        result = self.fetch(path, chamber, start.strftime(format), end.strftime(format), 
+            parse=lambda r: r['results'])
+        return result
+    
+    def by_date(self, chamber, date):
+        "Return votes cast in a chamber on a single day"
+        date = parse_date(date)
+        return self.by_range(chamber, date, date)
+    
+    def today(self, chamber):
+        "Return today's votes in a given chamber"
+        now = datetime.date.today()
+        return self.by_range(chamber, now, now)
+    
+    # detail response
+    def get(self, chamber, rollcall_num, session, congress=CURRENT_CONGRESS):
+        path = "%s/%s/sessions/%s/votes/%s"
+        result = self.fetch(path, congress, chamber, session, rollcall_num,
+            parse=lambda r: r['results'])
+        return result
+    
+    # votes by type
+    def by_type(self, chamber, vote_type, congress=CURRENT_CONGRESS):
+        "Return votes by type: missed, party, lone no, perfect"
+        path = "%s/%s/votes/%s"
+        result = self.fetch(path, congress, chamber, vote_type)
+        return result
+    
+    def missed(self, chamber, congress=CURRENT_CONGRESS):
+        "Missed votes by member"
+        return self.by_type(chamber, 'missed', congress)
+    
+    def party(self, chamber, congress=CURRENT_CONGRESS):
+        "How often does each member vote with their party?"
+        return self.by_type(chamber, 'party', congress)
+    
+    def loneno(self, chamber, congress=CURRENT_CONGRESS):
+        "How often is each member the lone no vote?"
+        return self.by_type(chamber, 'loneno', congress)
+    
+    def perfect(self, chamber, congress=CURRENT_CONGRESS):
+        "Who never misses a vote?"
+        return self.by_type(chamber, 'perfect', congress)
+    
+    def nominations(self, congress=CURRENT_CONGRESS):
+        "Return votes on nominations from a given Congress"
+        path = "%s/nominations"
+        result = self.fetch(path, congress)
+        return result
+
 class CommitteesClient(Client):
     
     def filter(self, chamber, congress=CURRENT_CONGRESS):
@@ -160,5 +254,6 @@ class NytCongress(Client):
         self.members = MembersClient(self.apikey, cache)
         self.bills = BillsClient(self.apikey, cache)
         self.committees = CommitteesClient(self.apikey, cache)
+        self.votes = VotesClient(self.apikey, cache)
     
 
