@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import datetime
 import json
 import os
 import time
@@ -7,7 +8,7 @@ import urllib
 import urllib2
 import unittest
 
-from nytcongress import NytCongress, get_congress
+from nytcongress import NytCongress, NytCongressError, get_congress
 
 API_KEY = os.environ['NYT_CONGRESS_API_KEY']
 
@@ -101,12 +102,95 @@ class CommitteeTest(APITest):
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/house/committees/HSBA.json?api-key=%s" % API_KEY
         self.check_response(hsba, url)
 
+class VoteTest(APITest):
+    
+    def test_votes_by_month(self):
+        jan = self.congress.votes.by_month('house', 2010, 1)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/house/votes/2010/01.json?api-key=%s" % API_KEY
+        self.check_response(jan, url, parse=lambda r: r['results'])
+    
+    def test_votes_by_date_range(self):
+        sept = self.congress.votes.by_range('house', datetime.date(2010, 9, 1), datetime.date(2010, 9, 30))
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/house/votes/2010-09-1/2010-09-30.json?api-key=%s" \
+            % API_KEY
+        self.check_response(sept, url, parse=lambda r: r['results'])
+    
+    def test_votes_by_reversed_range(self):
+        today = datetime.date.today()
+        last_week = today - datetime.timedelta(days=7)
+        self.assertEqual(
+            self.congress.votes.by_range('house', today, last_week),
+            self.congress.votes.by_range('house', last_week, today)
+        )
+    
+    def test_votes_today(self):
+        today = datetime.datetime.today()
+        votes = self.congress.votes.today('house')
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/" \
+              "congress/house/votes/%(today)s/%(today)s.json?api-key=%(key)s" \
+                  % {'today': today.strftime('%Y-%m-%d'), 'key': API_KEY}
+        self.check_response(votes, url, parse=lambda r: r['results'])
+    
+    def test_votes_by_date(self):
+        june14 = datetime.date(2010, 6, 14)
+        votes = self.congress.votes.by_date('house', june14)
+        url = ("http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
+               "house/votes/2010-06-14/2010-06-14.json?api-key=%s" % API_KEY)
+        self.check_response(votes, url, parse=lambda r: r['results'])
+    
+    def test_vote_rollcall(self):
+        vote = self.congress.votes.get('house', 580, 2, 111)
+        url = ("http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
+               "111/house/sessions/2/votes/580.json?api-key=%s" % API_KEY)
+        self.check_response(vote, url, parse=lambda r: r['results'])
+    
+    def test_votes_by_type(self):
+        missed = self.congress.votes.by_type('house', 'missed', 111)
+        url = ("http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
+               "111/house/votes/missed.json?api-key=%s" % API_KEY)
+        self.check_response(missed, url)
+    
+    def test_missed_votes(self):
+        missed = self.congress.votes.missed('house', 111)
+        url = ("http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
+               "111/house/votes/missed.json?api-key=%s" % API_KEY)
+        self.check_response(missed, url)
+    
+    def test_party_votes(self):
+        party = self.congress.votes.party('house', 111)
+        url = ("http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
+               "111/house/votes/party.json?api-key=%s" % API_KEY)
+        self.check_response(party, url)
+    
+    def test_loneno_votes(self):
+        lonenos = self.congress.votes.loneno('house', 111)
+        url = ("http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
+               "111/house/votes/loneno.json?api-key=%s" % API_KEY)
+        self.check_response(lonenos, url)
+    
+    def test_perfect_voters(self):
+        perfects = self.congress.votes.perfect('house', 111)
+        url = ("http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
+               "111/house/votes/perfect.json?api-key=%s" % API_KEY)
+        self.check_response(perfects, url)
+    
+    def test_nominations(self):
+        nom_votes = self.congress.votes.nominations(111)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominations.json?api-key=%s" % API_KEY
+        self.check_response(nom_votes, url)
+    
 class ClientTest(APITest):
 
     def test_generic_fetch(self):
         hr1 = self.congress.bills.get('hr1', 111)
         hr1_generic = self.congress.fetch('http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/bills/hr1.json')
         self.assertEqual(hr1, hr1_generic)
+
+class ErrorTest(APITest):
+    
+    def test_bad_vote_args(self):
+        # this needs a chamber argument
+        self.assertRaises(TypeError, self.congress.votes.by_month, 2010, 11)
 
 class UtilTest(unittest.TestCase):
 
