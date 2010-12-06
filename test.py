@@ -196,6 +196,29 @@ class UtilTest(unittest.TestCase):
         self.assertEqual(get_congress(2009), 111)
         self.assertEqual(get_congress(2010), 111)
 
+class DjangoTest(unittest.TestCase):
+    
+    def test_django_cache(self):
+        try:
+            from django.conf import settings
+            settings.configure(CACHE_BACKEND = 'locmem://')
+            from django.core.cache import cache
+        except ImportError:
+            # no Django, so nothing to test
+            return
+        
+        congress = NytCongress(API_KEY, cache)
+        
+        self.assertEqual(congress.http.cache, cache)
+        self.assertEqual(congress.members.http.cache, cache)
+        self.assertEqual(congress.bills.http.cache, cache)
+        self.assertEqual(congress.votes.http.cache, cache)
+        
+        try:
+            bills = congress.bills.introduced('house')
+        except Exception, e:
+            self.fail(e)
+        
 
 if __name__ == "__main__":
     unittest.main()
