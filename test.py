@@ -186,6 +186,10 @@ class ErrorTest(APITest):
     def test_bad_vote_args(self):
         # this needs a chamber argument
         self.assertRaises(TypeError, self.congress.votes.by_month, 2010, 11)
+    
+    def test_no_chamber_args(self):
+        # this takes a chamber argument, not a member_id
+        self.assertRaises(NytCongressError, self.congress.bills.introduced, 'N000032')
 
 class UtilTest(unittest.TestCase):
 
