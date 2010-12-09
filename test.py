@@ -8,7 +8,7 @@ import urllib
 import urllib2
 import unittest
 
-from nytcongress import NytCongress, NytCongressError, get_congress
+from nytcongress import NytCongress, NytCongressError, NytNotFoundError, get_congress
 
 API_KEY = os.environ['NYT_CONGRESS_API_KEY']
 
@@ -195,6 +195,10 @@ class ErrorTest(APITest):
     def test_no_chamber_args(self):
         # this takes a chamber argument, not a member_id
         self.assertRaises(NytCongressError, self.congress.bills.introduced, 'N000032')
+    
+    def test_404(self):
+        # the API returns a 404 for members not found
+        self.assertRaises(NytNotFoundError, self.congress.members.get, 'notamember')
 
 class UtilTest(unittest.TestCase):
 
