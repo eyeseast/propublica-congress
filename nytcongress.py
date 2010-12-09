@@ -14,7 +14,7 @@ try:
 except ImportError:
     import simplejson as json
 
-__all__ = ('NytCongress', 'NytCongressError', 'get_congress')
+__all__ = ('NytCongress', 'NytCongressError', 'NytNotFoundError', 'get_congress')
 
 DEBUG = False
 
@@ -37,10 +37,20 @@ def parse_date(s):
 
 CURRENT_CONGRESS = get_congress(datetime.datetime.now().year)
 
+# Error classes
+
 class NytCongressError(Exception):
     """
     Exception for New York Times Congress API errors
     """
+
+class NytNotFoundError(NytCongressError):
+    """
+    Exception for things not found
+    """
+    
+
+# Clients
 
 class Client(object):
 
@@ -61,6 +71,14 @@ class Client(object):
             url = path + '?' + urllib.urlencode(kwargs)
             
         resp, content = self.http.request(url)
+        if not resp.status in (200, 304):
+            content = json.loads(content)
+            errors = '; '.join(e['error'] for e in content['errors'])
+            if resp.status == 404:
+                raise NytNotFoundError(errors)
+            else:
+                raise NytCongressError(errors)
+        
         result = json.loads(content)
         
         if callable(parse):
