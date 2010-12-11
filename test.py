@@ -44,6 +44,11 @@ class MemberTest(APITest):
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/members/new.json?api-key=%s" % API_KEY
         self.check_response(new, url)
 
+    def test_departing_members(self):
+        new = self.congress.members.departing(chamber='house', congress=111)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/house/members/leaving.json?api-key=%s" % API_KEY
+        self.check_response(new, url)
+
 class BillTest(APITest):
     
     def test_recent_bills(self):

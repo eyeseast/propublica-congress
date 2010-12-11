@@ -112,6 +112,12 @@ class MembersClient(Client):
         path = "members/new"
         result = self.fetch(path, **kwargs)
         return result
+    
+    def departing(self, chamber, congress=CURRENT_CONGRESS):
+        "Takes a chamber and congress and returns a list of departing members"
+        path = "%s/%s/members/leaving"
+        result = self.fetch(path, congress, chamber)
+        return result
 
 class BillsClient(Client):
     
