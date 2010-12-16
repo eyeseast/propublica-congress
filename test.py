@@ -80,6 +80,11 @@ class BillTest(APITest):
         hr1 = self.congress.bills.related('hr1', 111)
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/bills/hr1/related.json?api-key=%s" % API_KEY
         self.check_response(hr1, url)
+    
+    def test_bill_cosponsors(self):
+        hr1 = self.congress.bills.cosponsors('hr1', 111)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/bills/hr1/cosponsors.json?api-key=%s" % API_KEY
+        self.check_response(hr1, url)
 
 class CommitteeTest(APITest):
     
