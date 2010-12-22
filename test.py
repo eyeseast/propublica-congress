@@ -8,7 +8,7 @@ import urllib
 import urllib2
 import unittest
 
-from nytcongress import NytCongress, NytCongressError, get_congress
+from nytcongress import NytCongress, NytCongressError, NytNotFoundError, get_congress
 
 API_KEY = os.environ['NYT_CONGRESS_API_KEY']
 
@@ -84,6 +84,11 @@ class BillTest(APITest):
     def test_related_bills(self):
         hr1 = self.congress.bills.related('hr1', 111)
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/bills/hr1/related.json?api-key=%s" % API_KEY
+        self.check_response(hr1, url)
+    
+    def test_bill_cosponsors(self):
+        hr1 = self.congress.bills.cosponsors('hr1', 111)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/bills/hr1/cosponsors.json?api-key=%s" % API_KEY
         self.check_response(hr1, url)
 
 class CommitteeTest(APITest):
@@ -191,6 +196,14 @@ class ErrorTest(APITest):
     def test_bad_vote_args(self):
         # this needs a chamber argument
         self.assertRaises(TypeError, self.congress.votes.by_month, 2010, 11)
+    
+    def test_no_chamber_args(self):
+        # this takes a chamber argument, not a member_id
+        self.assertRaises(NytCongressError, self.congress.bills.introduced, 'N000032')
+    
+    def test_404(self):
+        # the API returns a 404 for members not found
+        self.assertRaises(NytNotFoundError, self.congress.members.get, 'notamember')
 
 class UtilTest(unittest.TestCase):
 
@@ -201,6 +214,29 @@ class UtilTest(unittest.TestCase):
         self.assertEqual(get_congress(2009), 111)
         self.assertEqual(get_congress(2010), 111)
 
+class DjangoTest(unittest.TestCase):
+    
+    def test_django_cache(self):
+        try:
+            from django.conf import settings
+            settings.configure(CACHE_BACKEND = 'locmem://')
+            from django.core.cache import cache
+        except ImportError:
+            # no Django, so nothing to test
+            return
+        
+        congress = NytCongress(API_KEY, cache)
+        
+        self.assertEqual(congress.http.cache, cache)
+        self.assertEqual(congress.members.http.cache, cache)
+        self.assertEqual(congress.bills.http.cache, cache)
+        self.assertEqual(congress.votes.http.cache, cache)
+        
+        try:
+            bills = congress.bills.introduced('house')
+        except Exception, e:
+            self.fail(e)
+        
 
 if __name__ == "__main__":
     unittest.main()
