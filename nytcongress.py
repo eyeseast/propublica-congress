@@ -265,6 +265,11 @@ class NominationsClient(Client):
 		path = "%s/nominees/%s"
 		result = self.fetch(path, congress, nomination_type)
 		return result
+		
+	def get(self, nominee, congress=CURRENT_CONGRESS):
+		path = "%s/nominees/%s"
+		result = self.fetch(path, congress, nominee)
+		return result
 
 
 class NytCongress(Client):
