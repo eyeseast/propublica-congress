@@ -261,11 +261,6 @@ class CommitteesClient(Client):
 
 class NominationsClient(Client):
 
-    def by_state(self, state, congress=CURRENT_CONGRESS):
-        path = "%s/nominees/%s"
-        result = self.fetch(path, congress, state)
-        return result
-
 	def filter(self, nomination_type, congress=CURRENT_CONGRESS):
 		path = "%s/nominees/%s"
 		result = self.fetch(path, congress, nomination_type)
