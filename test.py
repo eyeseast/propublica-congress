@@ -112,7 +112,7 @@ class CommitteeTest(APITest):
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/house/committees/HSBA.json?api-key=%s" % API_KEY
         self.check_response(hsba, url)
 
-class NomineeTest(APITest):
+class NominationsTest(APITest):
 	
 	def test_nominee_list(self):
 		received = self.congress.nominations.filter('received', 111)
@@ -124,7 +124,7 @@ class NomineeTest(APITest):
 		self.check_response(withdrawn, url)
 
 		confirmed = self.congress.nominations.filter('confirmed', 111)
-		url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominees/withdrawn.json?api-key=%s" % API_KEY
+		url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominees/confirmed.json?api-key=%s" % API_KEY
 		self.check_response(confirmed, url)
 
 		updated = self.congress.nominations.filter('updated', 111)

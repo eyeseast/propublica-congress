@@ -259,6 +259,14 @@ class CommitteesClient(Client):
         result = self.fetch(path, congress, chamber, committee_id)
         return result
 
+class NominationsClient(Client):
+	
+	def filter(self, nomination_type, congress=CURRENT_CONGRESS):
+		path = "%s/nominees/%s"
+		result = self.fetch(path, congress, nomination_type)
+		return result
+
+
 class NytCongress(Client):
     """
     Implements the public interface for the NYT Congress API
@@ -286,5 +294,6 @@ class NytCongress(Client):
         self.bills = BillsClient(self.apikey, cache)
         self.committees = CommitteesClient(self.apikey, cache)
         self.votes = VotesClient(self.apikey, cache)
+        self.nominations = NominationsClient(self.apikey, cache)
     
 
