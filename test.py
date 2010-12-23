@@ -113,6 +113,11 @@ class CommitteeTest(APITest):
         self.check_response(hsba, url)
 
 class NominationTest(APITest):
+    
+    def test_nominations_by_state(self):
+        state = self.congress.nominations.by_state('DE', 111)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominees/state/DE.json?api-key=%s" % API_KEY
+        self.check_response(state, url)
 	
 	def test_nomination_list(self):
 		received = self.congress.nominations.filter('received', 111)
@@ -134,8 +139,7 @@ class NominationTest(APITest):
 	def test_nomination_detail(self):
 	    pn250 = self.congress.nominations.get('PN250', 111)
 	    url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominees/PN250.json?api-key=%s" % API_KEY
-	    self.check_response(pn250, url)
-
+	    self.check_response(pn250, url)    
 
 class VoteTest(APITest):
     
