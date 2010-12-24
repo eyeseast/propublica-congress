@@ -113,28 +113,41 @@ class CommitteeTest(APITest):
         self.check_response(hsba, url)
 
 class NominationTest(APITest):
-	
-	def test_nomination_list(self):
-		received = self.congress.nominations.filter('received', 111)
-		url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominees/received.json?api-key=%s" % API_KEY
-		self.check_response(received, url)
-		
-		withdrawn = self.congress.nominations.filter('withdrawn', 111)
-		url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominees/withdrawn.json?api-key=%s" % API_KEY
-		self.check_response(withdrawn, url)
+    
+    def test_nomination_list(self):
+        parse = lambda r: r['results']
+        received = self.congress.nominations.filter('received', 111)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominees/received.json?api-key=%s" % API_KEY
+        self.check_response(received, url, parse=parse)
+        
+        withdrawn = self.congress.nominations.filter('withdrawn', 111)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominees/withdrawn.json?api-key=%s" % API_KEY
+        self.check_response(withdrawn, url, parse=parse)
 
-		confirmed = self.congress.nominations.filter('confirmed', 111)
-		url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominees/confirmed.json?api-key=%s" % API_KEY
-		self.check_response(confirmed, url)
+        confirmed = self.congress.nominations.filter('confirmed', 111)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominees/confirmed.json?api-key=%s" % API_KEY
+        self.check_response(confirmed, url, parse=parse)
 
-		updated = self.congress.nominations.filter('updated', 111)
-		url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominees/updated.json?api-key=%s" % API_KEY
-		self.check_response(updated, url)
-		
-	def test_nomination_detail(self):
-	    pn250 = self.congress.nominations.get('PN250', 111)
-	    url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominees/PN250.json?api-key=%s" % API_KEY
-	    self.check_response(pn250, url)    
+        updated = self.congress.nominations.filter('updated', 111)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominees/updated.json?api-key=%s" % API_KEY
+        self.check_response(updated, url, parse=parse)
+        
+    def test_nomination_detail(self):
+        pn250 = self.congress.nominations.get('PN250', 111)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominees/PN250.json?api-key=%s" % API_KEY
+        self.check_response(pn250, url)
+
+    def test_nominations(self):
+        nom_votes = self.congress.votes.nominations(111)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominations.json?api-key=%s" % API_KEY
+        self.check_response(nom_votes, url)
+
+    def test_nominations_by_state(self):
+        parse = lambda r: r['results']
+        DE = self.congress.nominations.by_state('DE', 111)
+        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominees/state/DE.json?api-key=%s" % API_KEY
+        self.check_response(DE, url, parse=parse)
+
 
 class VoteTest(APITest):
     
@@ -207,11 +220,7 @@ class VoteTest(APITest):
         url = ("http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
                "111/house/votes/perfect.json?api-key=%s" % API_KEY)
         self.check_response(perfects, url)
-    
-    def test_nominations(self):
-        nom_votes = self.congress.votes.nominations(111)
-        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/nominations.json?api-key=%s" % API_KEY
-        self.check_response(nom_votes, url)
+            
     
 class ClientTest(APITest):
 

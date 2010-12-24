@@ -263,12 +263,17 @@ class NominationsClient(Client):
     
     def filter(self, nomination_type, congress=CURRENT_CONGRESS):
         path = "%s/nominees/%s"
-        result = self.fetch(path, congress, nomination_type)
+        result = self.fetch(path, congress, nomination_type, parse = lambda r: r['results'])
         return result
     
     def get(self, nominee, congress=CURRENT_CONGRESS):
         path = "%s/nominees/%s"
         result = self.fetch(path, congress, nominee)
+        return result
+    
+    def by_state(self, state, congress=CURRENT_CONGRESS):
+        path = "%s/nominees/state/%s"
+        result = self.fetch(path, congress, state, parse = lambda r: r['results'])
         return result
 
 
