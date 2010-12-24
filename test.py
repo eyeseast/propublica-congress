@@ -25,7 +25,7 @@ class APITest(unittest.TestCase):
     
     def setUp(self):
         self.congress = NytCongress(API_KEY)
-        time.sleep(.5)
+        #time.sleep(.5)
     
 class MemberTest(APITest):
 

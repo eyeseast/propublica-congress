@@ -48,12 +48,12 @@ class NytNotFoundError(NytCongressError):
     """
     Exception for things not found
     """
-    
+
 
 # Clients
 
 class Client(object):
-
+    
     BASE_URI = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
     
     def __init__(self, apikey, cache='.cache'):
@@ -69,7 +69,7 @@ class Client(object):
             url = (url % args) + urllib.urlencode(kwargs)
         else:
             url = path + '?' + urllib.urlencode(kwargs)
-            
+        
         resp, content = self.http.request(url)
         if not resp.status in (200, 304):
             content = json.loads(content)
@@ -86,7 +86,7 @@ class Client(object):
             if DEBUG:
                 result['_url'] = url
         return result
-        
+
 class MembersClient(Client):
     
     def get(self, member_id):
@@ -178,11 +178,11 @@ class VotesClient(Client):
         if not str(chamber).lower() in ('house', 'senate'):
             raise TypeError("by_month() requires chamber, year and month. Got %s, %s, %s" \
                 % (chamber, year, month))
-
+        
         now = datetime.datetime.now()
         year = year or now.year
         month = month or now.month
-
+        
         path = "%s/votes/%s/%s"
         result = self.fetch(path, chamber, year, month, parse=lambda r: r['results'])
         return result
@@ -197,7 +197,7 @@ class VotesClient(Client):
             start, end = end, start
         format = "%Y-%m-%d"
         path = "%s/votes/%s/%s"
-        result = self.fetch(path, chamber, start.strftime(format), end.strftime(format), 
+        result = self.fetch(path, chamber, start.strftime(format), end.strftime(format),
             parse=lambda r: r['results'])
         return result
     
@@ -260,17 +260,17 @@ class CommitteesClient(Client):
         return result
 
 class NominationsClient(Client):
+    
+    def filter(self, nomination_type, congress=CURRENT_CONGRESS):
+        path = "%s/nominees/%s"
+        result = self.fetch(path, congress, nomination_type)
+        return result
+    
+    def get(self, nominee, congress=CURRENT_CONGRESS):
+        path = "%s/nominees/%s"
+        result = self.fetch(path, congress, nominee)
+        return result
 
-	def filter(self, nomination_type, congress=CURRENT_CONGRESS):
-		path = "%s/nominees/%s"
-		result = self.fetch(path, congress, nomination_type)
-		return result
-		
-	def get(self, nominee, congress=CURRENT_CONGRESS):
-		path = "%s/nominees/%s"
-		result = self.fetch(path, congress, nominee)
-		return result
-		
 
 class NytCongress(Client):
     """
@@ -300,5 +300,5 @@ class NytCongress(Client):
         self.committees = CommitteesClient(self.apikey, cache)
         self.votes = VotesClient(self.apikey, cache)
         self.nominations = NominationsClient(self.apikey, cache)
-    
+
 
