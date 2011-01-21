@@ -25,7 +25,7 @@ class APITest(unittest.TestCase):
     
     def setUp(self):
         self.congress = NytCongress(API_KEY)
-        #time.sleep(.5)
+        time.sleep(.5)
     
 class MemberTest(APITest):
 
@@ -48,6 +48,17 @@ class MemberTest(APITest):
         new = self.congress.members.departing(chamber='house', congress=111)
         url = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/111/house/members/leaving.json?api-key=%s" % API_KEY
         self.check_response(new, url)
+    
+    def test_compare_members(self):
+        first = "A000069"
+        second = "A000360"
+        chamber = "senate"
+        congress = 111
+        comparison = self.congress.members.compare(first, second, chamber, congress)
+        url = ("http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
+              "members/A000069/votes/A000360/111/senate.json?api-key=%s" % API_KEY)
+        self.check_response(comparison, url)
+        
 
 class BillTest(APITest):
     

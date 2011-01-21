@@ -118,6 +118,15 @@ class MembersClient(Client):
         path = "%s/%s/members/leaving"
         result = self.fetch(path, congress, chamber)
         return result
+    
+    def compare(self, first, second, chamber, congress=CURRENT_CONGRESS):
+        """
+        See how often two members voted together in a given Congress.
+        Takes two member IDs, a chamber and a Congress number.
+        """
+        path = "members/%s/votes/%s/%s/%s"
+        result = self.fetch(path, first, second, congress, chamber)
+        return result
 
 class BillsClient(Client):
     
