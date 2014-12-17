@@ -2,7 +2,7 @@
 A Python client for the New York Times Congress API
 """
 __author__ = "Chris Amico (eyeseast@gmail.com)"
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 import datetime
 import httplib2
@@ -87,6 +87,7 @@ class Client(object):
                 result['_url'] = url
         return result
 
+
 class MembersClient(Client):
     
     def get(self, member_id):
@@ -127,6 +128,7 @@ class MembersClient(Client):
         path = "members/%s/votes/%s/%s/%s"
         result = self.fetch(path, first, second, congress, chamber)
         return result
+
 
 class BillsClient(Client):
     
@@ -176,6 +178,7 @@ class BillsClient(Client):
     def updated(self, chamber, congress=CURRENT_CONGRESS):
         "Shortcut for getting updated bills"
         return self.recent(chamber, congress, 'updated')
+
 
 class VotesClient(Client):
     
@@ -256,6 +259,7 @@ class VotesClient(Client):
         result = self.fetch(path, congress)
         return result
 
+
 class CommitteesClient(Client):
     
     def filter(self, chamber, congress=CURRENT_CONGRESS):
@@ -267,6 +271,7 @@ class CommitteesClient(Client):
         path = "%s/%s/committees/%s"
         result = self.fetch(path, congress, chamber, committee_id)
         return result
+
 
 class NominationsClient(Client):
     
