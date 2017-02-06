@@ -114,6 +114,11 @@ class MembersClient(Client):
         path = path.format(first=first, second=second, congress=congress, chamber=chamber)
         return self.fetch(path)
 
+    def party(self):
+        "Get state party counts for the current Congress"
+        path = "states/members/party.json"
+        return self.fetch(path, parse=lambda r: r['results'])
+
 
 class BillsClient(Client):
     
