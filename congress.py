@@ -13,7 +13,7 @@ import urllib
 
 import httplib2
 
-__all__ = ('Congress', 'CongressError', 'NotFound', 'get_congress')
+__all__ = ('Congress', 'CongressError', 'NotFound', 'get_congress', 'CURRENT_CONGRESS')
 
 
 DEBUG = True
@@ -150,6 +150,7 @@ class BillsClient(Client):
         "Takes a chamber, Congress, and type (introduced|updated), returns a list of recent bills"
         path = "{congress}/{chamber}/bills/{type}.json".format(
             congress=congress, chamber=chamber, type=type)
+        return self.fetch(path)
     
     def introduced(self, chamber, congress=CURRENT_CONGRESS):
         "Shortcut for getting introduced bills"
@@ -247,32 +248,30 @@ class VotesClient(Client):
 class CommitteesClient(Client):
     
     def filter(self, chamber, congress=CURRENT_CONGRESS):
-        path = "%s/%s/committees"
-        result = self.fetch(path, congress, chamber)
-        return result
+        path = "{congress}/{chamber}/committees.json".format(
+            congress=congress, chamber=chamber)
+        return self.fetch(path)
     
-    def get(self, chamber, committee_id, congress=CURRENT_CONGRESS):
-        path = "%s/%s/committees/%s"
-        result = self.fetch(path, congress, chamber, committee_id)
-        return result
+    def get(self, chamber, committee, congress=CURRENT_CONGRESS):
+        path = "{congress}/{chamber}/committees/{committee}.json".format(
+            congress=congress, chamber=chamber, committee=committee)
+        return self.fetch(path)
 
 
 class NominationsClient(Client):
     
-    def filter(self, nomination_type, congress=CURRENT_CONGRESS):
-        path = "%s/nominees/%s"
-        result = self.fetch(path, congress, nomination_type, parse = lambda r: r['results'])
-        return result
+    def filter(self, type, congress=CURRENT_CONGRESS):
+        path = "{congress}/nominees/{type}.json".format(congress=congress, type=type)
+        return self.fetch(path)
     
     def get(self, nominee, congress=CURRENT_CONGRESS):
-        path = "%s/nominees/%s"
-        result = self.fetch(path, congress, nominee)
-        return result
+        path = "{congress}/nominees/{nominee}.json".format(congress=congress, nominee=nominee)
+        return self.fetch(path)
     
     def by_state(self, state, congress=CURRENT_CONGRESS):
-        path = "%s/nominees/state/%s"
-        result = self.fetch(path, congress, state, parse = lambda r: r['results'])
-        return result
+        path = "{congress}/nominees/state/{state}.json".format(
+            congress=congress, state=state)
+        return self.fetch(path)
 
 
 class Congress(Client):
