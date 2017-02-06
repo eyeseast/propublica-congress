@@ -1,25 +1,28 @@
 """
-A Python client for the New York Times Congress API
+A Python client for the ProPublica Congress API
+
+API docs: https://propublica.github.io/congress-api-docs/
 """
 __author__ = "Chris Amico (eyeseast@gmail.com)"
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 import datetime
-import httplib2
+import json
 import os
 import urllib
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import httplib2
 
-__all__ = ('NytCongress', 'NytCongressError', 'NytNotFoundError', 'get_congress')
+__all__ = ('Congress', 'CongressError', 'NotFound', 'get_congress')
 
-DEBUG = False
+
+DEBUG = True
 
 def get_congress(year):
     "Return the Congress number for a given year"
+    if year < 1789:
+        raise CongressError('There was no Congress before 1789.')
+
     return (year - 1789) / 2 + 1
 
 def parse_date(s):
@@ -39,137 +42,114 @@ CURRENT_CONGRESS = get_congress(datetime.datetime.now().year)
 
 # Error classes
 
-class NytCongressError(Exception):
+class CongressError(Exception):
     """
-    Exception for New York Times Congress API errors
+    Exception for general Congress API errors
     """
 
-class NytNotFoundError(NytCongressError):
+class NotFound(CongressError):
     """
     Exception for things not found
     """
-
 
 # Clients
 
 class Client(object):
     
-    BASE_URI = "http://api.nytimes.com/svc/politics/v3/us/legislative/congress/"
+    BASE_URI = "https://api.propublica.org/congress/v1/"
     
-    def __init__(self, apikey, cache='.cache'):
+    def __init__(self, apikey=None, cache='.cache'):
         self.apikey = apikey
         self.http = httplib2.Http(cache)
     
-    def fetch(self, path, *args, **kwargs):
-        parse = kwargs.pop('parse', lambda r: r['results'][0])
-        kwargs['api-key'] = self.apikey
-        
-        if not path.lower().startswith(self.BASE_URI):
-            url = self.BASE_URI + "%s.json?" % path
-            url = (url % args) + urllib.urlencode(kwargs)
-        else:
-            url = path + '?' + urllib.urlencode(kwargs)
-        
-        resp, content = self.http.request(url)
-        if not resp.status in (200, 304):
-            content = json.loads(content)
-            errors = '; '.join(e['error'] for e in content['errors'])
-            if resp.status == 404:
-                raise NytNotFoundError(errors)
-            else:
-                raise NytCongressError(errors)
-        
-        result = json.loads(content)
-        
+    def fetch(self, path, parse=lambda r: r['results'][0]):
+        """
+        Make an API request, with authentication
+        """
+        url = self.BASE_URI + path
+        headers = {'X-API-Key': self.apikey}
+
+        resp, content = self.http.request(url, headers=headers)
+        content = json.loads(content)
+
         if callable(parse):
-            result = parse(result)
-            if DEBUG:
-                result['_url'] = url
-        return result
+            content = parse(content)
+
+        return content
 
 
 class MembersClient(Client):
     
     def get(self, member_id):
         "Takes a bioguide_id, returns a legislator"
-        path = "members/%s"
-        result = self.fetch(path, member_id)
-        return result
+        path = "members/{0}.json".format(member_id)
+        return self.fetch(path)
     
     def filter(self, chamber, congress=CURRENT_CONGRESS, **kwargs):
         "Takes a chamber, Congress, and optional state and district, returning a list of members"
-        path = "%s/%s/members"
-        result = self.fetch(path, congress, chamber, **kwargs)
-        return result
+        path = "{0}/{1}/members.json".format(congress, chamber)
+        return self.fetch(path)
     
     def bills(self, member_id, type='introduced'):
         "Same as BillsClient.by_member"
-        path = "members/%s/bills/%s"
-        result = self.fetch(path, member_id, type)
-        return result
+        path = "members/{0}/bills/{1}.json".format(member_id, type)
+        return self.fetch(path)
     
     def new(self, **kwargs):
         "Returns a list of new members"
-        path = "members/new"
-        result = self.fetch(path, **kwargs)
-        return result
+        path = "members/new.json"
+        return self.fetch(path)
     
     def departing(self, chamber, congress=CURRENT_CONGRESS):
         "Takes a chamber and congress and returns a list of departing members"
-        path = "%s/%s/members/leaving"
-        result = self.fetch(path, congress, chamber)
-        return result
+        path = "{0}/{1}/members/leaving.json".format(congress, chamber)
+        return self.fetch(path)
     
     def compare(self, first, second, chamber, congress=CURRENT_CONGRESS):
         """
         See how often two members voted together in a given Congress.
         Takes two member IDs, a chamber and a Congress number.
         """
-        path = "members/%s/votes/%s/%s/%s"
-        result = self.fetch(path, first, second, congress, chamber)
-        return result
+        path = "{first}/votes/{second}/{congress}/{chamber}.json"
+        path = path.format(first=first, second=second, congress=congress, chamber=chamber)
+        return self.fetch(path)
 
 
 class BillsClient(Client):
     
     def by_member(self, member_id, type='introduced'):
-        "Takes a bioguide ID and a type (introduced|updated|cosponsored|withdrawn), returns recent bills"
-        path = "members/%s/bills/%s"
-        result = self.fetch(path, member_id, type)
-        return result
+        """
+        Takes a bioguide ID and a type (introduced|updated|cosponsored|withdrawn), 
+        returns recent bills
+        """
+        path = "members/{member_id}/bills/{type}.json".format(member_id=member_id, type=type)
+        return self.fetch(path)
     
-    def get(self, bill_id, congress=CURRENT_CONGRESS):
-        path = "%s/bills/%s"
-        result = self.fetch(path, congress, bill_id)
-        return result
+    def get(self, bill_id, congress=CURRENT_CONGRESS, type=None):
+        if type:
+            path = "{congress}/bills/{bill_id}/{type}.json".format(
+                congress=congress, bill_id=bill_id)
+        else:
+            path = "{congress}/bills/{bill_id}.json".format(
+                congress=congress, bill_id=bill_id)
+        return self.fetch(path)
     
     def amendments(self, bill_id, congress=CURRENT_CONGRESS):
-        path = "%s/bills/%s/amendments"
-        result = self.fetch(path, congress, bill_id)
-        return result
-    
+        return self.get(bill_id, congress, 'amendments')
+
     def related(self, bill_id, congress=CURRENT_CONGRESS):
-        path = "%s/bills/%s/related"
-        result = self.fetch(path, congress, bill_id)
-        return result
+        return self.get(bill_id, congress, 'related')
     
     def subjects(self, bill_id, congress=CURRENT_CONGRESS):
-        path = "%s/bills/%s/subjects"
-        result = self.fetch(path, congress, bill_id)
-        return result
+        return self.get(bill_id, congress, 'subjects')
     
     def cosponsors(self, bill_id, congress=CURRENT_CONGRESS):
-        path = "%s/bills/%s/cosponsors"
-        result = self.fetch(path, congress, bill_id)
-        return result
+        return self.get(bill_id, congress, 'cosponsors')
     
     def recent(self, chamber, congress=CURRENT_CONGRESS, type='introduced'):
         "Takes a chamber, Congress, and type (introduced|updated), returns a list of recent bills"
-        if not str(chamber).lower() in ('house', 'senate'):
-            raise NytCongressError("Argument for `chamber` must be House or Senate; %s given" % chamber)
-        path = "%s/%s/bills/%s"
-        result = self.fetch(path, congress, chamber, type)
-        return result
+        path = "{congress}/{chamber}/bills/{type}.json".format(
+            congress=congress, chamber=chamber, type=type)
     
     def introduced(self, chamber, congress=CURRENT_CONGRESS):
         "Shortcut for getting introduced bills"
@@ -179,6 +159,14 @@ class BillsClient(Client):
         "Shortcut for getting updated bills"
         return self.recent(chamber, congress, 'updated')
 
+    def passed(self, chamber, congress=CURRENT_CONGRESS):
+        "Shortcut for passed bills"
+        return self.recent(chamber, congress, 'passed')
+
+    def major(self, chamber, congress=CURRENT_CONGRESS):
+        "Shortcut for major bills"
+        return self.recent(chamber, congress, 'major')
+
 
 class VotesClient(Client):
     
@@ -187,31 +175,27 @@ class VotesClient(Client):
         """
         Return votes for a single month, defaulting to the current month.
         """
-        if not str(chamber).lower() in ('house', 'senate'):
-            raise TypeError("by_month() requires chamber, year and month. Got %s, %s, %s" \
-                % (chamber, year, month))
-        
+
         now = datetime.datetime.now()
         year = year or now.year
         month = month or now.month
         
-        path = "%s/votes/%s/%s"
-        result = self.fetch(path, chamber, year, month, parse=lambda r: r['results'])
-        return result
+        path = "{chamber}/votes/{year}/{month}.json".format(
+            chamber=chamber, year=year, month=month)
+        return self.fetch(path)
     
     def by_range(self, chamber, start, end):
-        """\
+        """
         Return votes cast in a chamber between two dates,
         up to one month apart.
         """
         start, end = parse_date(start), parse_date(end)
         if start > end:
             start, end = end, start
-        format = "%Y-%m-%d"
-        path = "%s/votes/%s/%s"
-        result = self.fetch(path, chamber, start.strftime(format), end.strftime(format),
-            parse=lambda r: r['results'])
-        return result
+
+        path = "{chamber}/votes/{start:%Y-%m-%d}/{end:%Y-%m-%d}.json".format(
+            chamber=chamber, start=start, end=end)
+        return self.fetch(path)
     
     def by_date(self, chamber, date):
         "Return votes cast in a chamber on a single day"
@@ -225,17 +209,18 @@ class VotesClient(Client):
     
     # detail response
     def get(self, chamber, rollcall_num, session, congress=CURRENT_CONGRESS):
-        path = "%s/%s/sessions/%s/votes/%s"
-        result = self.fetch(path, congress, chamber, session, rollcall_num,
-            parse=lambda r: r['results'])
-        return result
+        "Return a specific roll-call vote, including a complete list of member positions"
+        path = "{congress}/{chamber}/sessions/{session}/votes/{rollcall_num}.json"
+        path = path.format(congress=congress, chamber=chamber, 
+            session=session, rollcall_num=rollcall_num)
+        return self.fetch(path)
     
     # votes by type
-    def by_type(self, chamber, vote_type, congress=CURRENT_CONGRESS):
+    def by_type(self, chamber, type, congress=CURRENT_CONGRESS):
         "Return votes by type: missed, party, lone no, perfect"
-        path = "%s/%s/votes/%s"
-        result = self.fetch(path, congress, chamber, vote_type)
-        return result
+        path = "{congress}/{chamber}/votes/{type}.json".format(
+            congress=congress, chamber=chamber, type=type)
+        return self.fetch(path)
     
     def missed(self, chamber, congress=CURRENT_CONGRESS):
         "Missed votes by member"
@@ -255,9 +240,8 @@ class VotesClient(Client):
     
     def nominations(self, congress=CURRENT_CONGRESS):
         "Return votes on nominations from a given Congress"
-        path = "%s/nominations"
-        result = self.fetch(path, congress)
-        return result
+        path = "{congress}/nominations.json".format(congress=congress)
+        return self.fetch(path)
 
 
 class CommitteesClient(Client):
@@ -291,7 +275,7 @@ class NominationsClient(Client):
         return result
 
 
-class NytCongress(Client):
+class Congress(Client):
     """
     Implements the public interface for the NYT Congress API
     
@@ -306,14 +290,14 @@ class NytCongress(Client):
     Create a new instance with your API key, or set an environment
     variable called NYT_CONGRESS_API_KEY.
     
-    NytCongress uses httplib2, and caching is pluggable. By default,
+    Congress uses httplib2, and caching is pluggable. By default,
     it uses httplib2.FileCache, in a directory called .cache, but it
     should also work with memcache or anything else that exposes the
     same interface as FileCache (per httplib2 docs).
     """
     
-    def __init__(self, apikey=os.environ.get('NYT_CONGRESS_API_KEY'), cache='.cache'):
-        super(NytCongress, self).__init__(apikey, cache)
+    def __init__(self, apikey=os.environ.get('PROPUBLICA_API_KEY'), cache='.cache'):
+        super(Congress, self).__init__(apikey, cache)
         self.members = MembersClient(self.apikey, cache)
         self.bills = BillsClient(self.apikey, cache)
         self.committees = CommitteesClient(self.apikey, cache)

@@ -1,4 +1,4 @@
-Python NytCongress
+Python Congress
 ==================
 
 A Python client for the New York Times [Congress API](http://developer.nytimes.com/docs/congress_api)
@@ -15,8 +15,8 @@ Or download and run
 Usage
 -----
 
-    >>> from nytcongress import NytCongress
-    >>> congress = NytCongress(API_KEY)
+    >>> from nytcongress import Congress
+    >>> congress = Congress(API_KEY)
     
     # get member by bioguide ID
     >>> pelosi = congress.members.get('P000197')
