@@ -72,6 +72,10 @@ class Client(object):
         resp, content = self.http.request(url, headers=headers)
         content = json.loads(content)
 
+        # handle errors
+        if content['status'] == 'ERROR':
+            pass
+
         if callable(parse):
             content = parse(content)
 
@@ -181,7 +185,6 @@ class VotesClient(Client):
         """
         Return votes for a single month, defaulting to the current month.
         """
-
         now = datetime.datetime.now()
         year = year or now.year
         month = month or now.month
@@ -219,7 +222,7 @@ class VotesClient(Client):
         path = "{congress}/{chamber}/sessions/{session}/votes/{rollcall_num}.json"
         path = path.format(congress=congress, chamber=chamber, 
             session=session, rollcall_num=rollcall_num)
-        return self.fetch(path)
+        return self.fetch(path, parse=lambda r: r['results'])
     
     # votes by type
     def by_type(self, chamber, type, congress=CURRENT_CONGRESS):

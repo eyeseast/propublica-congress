@@ -19,7 +19,7 @@ class APITest(unittest.TestCase):
         headers = {'X-API-Key': API_KEY}
         response = json.loads(self.http.request(url, headers=headers)[1])
         
-        if parse and callable(parse):
+        if callable(parse):
             response = parse(response)
         
         self.assertEqual(result, response)
@@ -27,7 +27,7 @@ class APITest(unittest.TestCase):
     def setUp(self):
         self.congress = Congress(API_KEY)
         self.http = httplib2.Http()
-        time.sleep(.5)
+        #time.sleep(.5)
     
 class MemberTest(APITest):
 
@@ -36,29 +36,28 @@ class MemberTest(APITest):
         url = "https://api.propublica.org/congress/v1/members/P000197.json"
         self.check_response(pelosi, url)
     
-    def test_filter_members(self):
-        ca = self.congress.members.filter(chamber='house', state='CA', congress=111)
-        url = "https://api.propublica.org/congress/v1/111/house/members.json?&state=ca&api-key=%s" % API_KEY
-        self.check_response(ca, url)
+    def test_list_members(self):
+        house = self.congress.members.filter(congress=114, chamber=house)
+        url = "https://api.propublica.org/congress/v1/114/house/members.json"
+        self.check_response(house, url)
     
     def test_new_members(self):
         new = self.congress.members.new()
-        url = "https://api.propublica.org/congress/v1/members/new.json?api-key=%s" % API_KEY
+        url = "https://api.propublica.org/congress/v1/members/new.json"
         self.check_response(new, url)
 
     def test_departing_members(self):
-        new = self.congress.members.departing(chamber='house', congress=111)
-        url = "https://api.propublica.org/congress/v1/111/house/members/leaving.json?api-key=%s" % API_KEY
+        new = self.congress.members.departing(chamber='house', congress=114)
+        url = "https://api.propublica.org/congress/v1/114/house/members/leaving.json"
         self.check_response(new, url)
     
     def test_compare_members(self):
-        first = "A000069"
-        second = "A000360"
-        chamber = "senate"
-        congress = 111
+        first = "G000575"
+        second = "D000624"
+        chamber = "house"
+        congress = 114
         comparison = self.congress.members.compare(first, second, chamber, congress)
-        url = ("https://api.propublica.org/congress/v1/"
-              "members/A000069/votes/A000360/111/senate.json?api-key=%s" % API_KEY)
+        url = "https://api.propublica.org/congress/v1/members/G000575/votes/D000624/114/house.json"
         self.check_response(comparison, url)
         
 
@@ -109,7 +108,7 @@ class BillTest(APITest):
         url = "https://api.propublica.org/congress/v1/111/bills/hr1/cosponsors.json?api-key=%s" % API_KEY
         self.check_response(hr1, url)
 
-class CommitteeTest(APITest):
+class _CommitteeTest(APITest):
     
     def test_committee_list(self):
         house = self.congress.committees.filter('house', 111)
@@ -199,9 +198,8 @@ class VoteTest(APITest):
         self.check_response(votes, url, parse=lambda r: r['results'])
     
     def test_vote_rollcall(self):
-        vote = self.congress.votes.get('house', 580, 2, 111)
-        url = ("https://api.propublica.org/congress/v1/"
-               "111/house/sessions/2/votes/580.json?api-key=%s" % API_KEY)
+        vote = self.congress.votes.get('senate', 17, 2, 114)
+        url = "https://api.propublica.org/congress/v1/114/senate/sessions/2/votes/17.json"
         self.check_response(vote, url, parse=lambda r: r['results'])
     
     def test_votes_by_type(self):
