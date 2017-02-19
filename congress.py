@@ -25,6 +25,11 @@ def get_congress(year):
 
     return (year - 1789) / 2 + 1
 
+def check_chamber(chamber):
+    "Validate that chamber is house or senate"
+    if str(chamber).lower() not in ('house', 'senate'):
+        raise TypeError('chamber must be either "house" or "senate"')
+
 def parse_date(s):
     """
     Parse a date using dateutil.parser.parse if available,
@@ -46,6 +51,11 @@ class CongressError(Exception):
     """
     Exception for general Congress API errors
     """
+    def __init__(self, message, response=None):
+        super(CongressError, self).__init__(message)
+        self.message = message
+        self.response = response
+
 
 class NotFound(CongressError):
     """
@@ -73,8 +83,12 @@ class Client(object):
         content = json.loads(content)
 
         # handle errors
-        if content['status'] == 'ERROR':
-            pass
+        if not content.get('status') == 'OK':
+
+            if "errors" in content and content['errors'][0]['error'] == "Record not found":
+                raise NotFound(path)
+
+            raise CongressError(content)
 
         if callable(parse):
             content = parse(content)
@@ -91,6 +105,7 @@ class MembersClient(Client):
     
     def filter(self, chamber, congress=CURRENT_CONGRESS, **kwargs):
         "Takes a chamber, Congress, and optional state and district, returning a list of members"
+        check_chamber(chamber)
         path = "{0}/{1}/members.json".format(congress, chamber)
         return self.fetch(path)
     
@@ -106,6 +121,7 @@ class MembersClient(Client):
     
     def departing(self, chamber, congress=CURRENT_CONGRESS):
         "Takes a chamber and congress and returns a list of departing members"
+        check_chamber(chamber)
         path = "{0}/{1}/members/leaving.json".format(congress, chamber)
         return self.fetch(path)
     
@@ -114,6 +130,7 @@ class MembersClient(Client):
         See how often two members voted together in a given Congress.
         Takes two member IDs, a chamber and a Congress number.
         """
+        check_chamber(chamber)
         path = "{first}/votes/{second}/{congress}/{chamber}.json"
         path = path.format(first=first, second=second, congress=congress, chamber=chamber)
         return self.fetch(path)
@@ -157,6 +174,7 @@ class BillsClient(Client):
         return self.get(bill_id, congress, 'cosponsors')
     
     def recent(self, chamber, congress=CURRENT_CONGRESS, type='introduced'):
+        check_chamber(chamber)
         "Takes a chamber, Congress, and type (introduced|updated), returns a list of recent bills"
         path = "{congress}/{chamber}/bills/{type}.json".format(
             congress=congress, chamber=chamber, type=type)
@@ -186,6 +204,8 @@ class VotesClient(Client):
         """
         Return votes for a single month, defaulting to the current month.
         """
+        check_chamber(chamber)
+
         now = datetime.datetime.now()
         year = year or now.year
         month = month or now.month
@@ -199,6 +219,8 @@ class VotesClient(Client):
         Return votes cast in a chamber between two dates,
         up to one month apart.
         """
+        check_chamber(chamber)
+
         start, end = parse_date(start), parse_date(end)
         if start > end:
             start, end = end, start
@@ -220,6 +242,8 @@ class VotesClient(Client):
     # detail response
     def get(self, chamber, rollcall_num, session, congress=CURRENT_CONGRESS):
         "Return a specific roll-call vote, including a complete list of member positions"
+        check_chamber(chamber)
+
         path = "{congress}/{chamber}/sessions/{session}/votes/{rollcall_num}.json"
         path = path.format(congress=congress, chamber=chamber, 
             session=session, rollcall_num=rollcall_num)
@@ -228,6 +252,8 @@ class VotesClient(Client):
     # votes by type
     def by_type(self, chamber, type, congress=CURRENT_CONGRESS):
         "Return votes by type: missed, party, lone no, perfect"
+        check_chamber(chamber)
+
         path = "{congress}/{chamber}/votes/{type}.json".format(
             congress=congress, chamber=chamber, type=type)
         return self.fetch(path)
@@ -257,11 +283,13 @@ class VotesClient(Client):
 class CommitteesClient(Client):
     
     def filter(self, chamber, congress=CURRENT_CONGRESS):
+        check_chamber(chamber)
         path = "{congress}/{chamber}/committees.json".format(
             congress=congress, chamber=chamber)
         return self.fetch(path)
     
     def get(self, chamber, committee, congress=CURRENT_CONGRESS):
+        check_chamber(chamber)
         path = "{congress}/{chamber}/committees/{committee}.json".format(
             congress=congress, chamber=chamber, committee=committee)
         return self.fetch(path)

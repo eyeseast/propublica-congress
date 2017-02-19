@@ -84,17 +84,17 @@ class BillTest(APITest):
         self.check_response(hr2393, url)
 
 
-class _CommitteeTest(APITest):
+class CommitteeTest(APITest):
     
     def test_committee_list(self):
-        house = self.congress.committees.filter('house', 113)
-        url = "https://api.propublica.org/congress/v1/113/house/committees.json"
+        house = self.congress.committees.filter('house', 115)
+        url = "https://api.propublica.org/congress/v1/115/house/committees.json"
         self.check_response(house, url)
             
     def test_committee_detail(self):
-        HSBG = self.congress.committees.get('house', 'HSBG', 113)
-        url = "https://api.propublica.org/congress/v1/113/house/committees/HSBG.json"
-        self.check_response(HSBG, url)
+        HSIG = self.congress.committees.get('house', 'HSIG', 115)
+        url = "https://api.propublica.org/congress/v1/115/house/committees/HSIG.json"
+        self.check_response(HSIG, url)
 
 class NominationTest(APITest):
     
@@ -189,15 +189,18 @@ class ErrorTest(APITest):
     
     def test_bad_vote_args(self):
         # this needs a chamber argument
-        self.assertRaises(TypeError, self.congress.votes.by_month, 2010, 11)
+        with self.assertRaises(TypeError):
+            self.congress.votes.by_month(2010, 11)
     
     def test_no_chamber_args(self):
         # this takes a chamber argument, not a member_id
-        self.assertRaises(CongressError, self.congress.bills.introduced, 'N000032')
+        with self.assertRaises(TypeError):
+            self.congress.bills.introduced('N000032')
     
     def test_404(self):
         # the API returns a 404 for members not found
-        self.assertRaises(NotFound, self.congress.members.get, 'notamember')
+        with self.assertRaises(NotFound):
+            self.congress.members.get('notamember')
 
 class UtilTest(unittest.TestCase):
 
