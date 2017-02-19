@@ -137,10 +137,11 @@ class BillsClient(Client):
     def get(self, bill_id, congress=CURRENT_CONGRESS, type=None):
         if type:
             path = "{congress}/bills/{bill_id}/{type}.json".format(
-                congress=congress, bill_id=bill_id)
+                congress=congress, bill_id=bill_id, type=type)
         else:
             path = "{congress}/bills/{bill_id}.json".format(
                 congress=congress, bill_id=bill_id)
+
         return self.fetch(path)
     
     def amendments(self, bill_id, congress=CURRENT_CONGRESS):
@@ -191,7 +192,7 @@ class VotesClient(Client):
         
         path = "{chamber}/votes/{year}/{month}.json".format(
             chamber=chamber, year=year, month=month)
-        return self.fetch(path)
+        return self.fetch(path, parse=lambda r: r['results'])
     
     def by_range(self, chamber, start, end):
         """
@@ -204,7 +205,7 @@ class VotesClient(Client):
 
         path = "{chamber}/votes/{start:%Y-%m-%d}/{end:%Y-%m-%d}.json".format(
             chamber=chamber, start=start, end=end)
-        return self.fetch(path)
+        return self.fetch(path, parse=lambda r: r['results'])
     
     def by_date(self, chamber, date):
         "Return votes cast in a chamber on a single day"
