@@ -6,11 +6,10 @@ A Python client for the New York Times [Congress API](http://developer.nytimes.c
 Install
 -------
 
-    $ pip install python-nytcongress
+Download and run the install script:
 
-Or download and run
-
-    $ python setup.py install
+    git clone https://github.com/eyeseast/propublica-congress && cd propublica-congress
+    python setup.py install
 
 Usage
 -----
