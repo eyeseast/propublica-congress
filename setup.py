@@ -9,16 +9,16 @@ except ImportError:
 with open('README.md') as f:
     README = f.read()
 
-VERSION = "0.1.1"
+VERSION = "0.1.0"
 
 setup(
-    name = "python-nytcongress",
+    name = "python-congress",
     version = VERSION,
-    description = "A Python client for the New York Times Congress API",
+    description = "A Python client for the ProPublica Congress API",
     long_description = README,
     author = "Chris Amico",
     author_email = "eyeseast@gmail.com",
-    py_modules = ['nytcongress'],
+    py_modules = ['congress'],
     install_requires = ['httplib2'],
     platforms= ['any'],
     classifiers = [

@@ -156,9 +156,9 @@ class VoteTest(APITest):
     def test_votes_today(self):
         today = datetime.datetime.today()
         votes = self.congress.votes.today('house')
-        url = "http://api.nytimes.com/svc/politics/v3/us/legislative/" \
-              "congress/house/votes/%(today)s/%(today)s.json" \
-                  % {'today': today.strftime('%Y-%m-%d')}
+        url = "https://api.propublica.org/congress/v1/house/votes/{today}/{today}.json".format(
+            today=today.strftime('%Y-%m-%d'))
+
         self.check_response(votes, url, parse=lambda r: r['results'])
     
     def test_votes_by_date(self):

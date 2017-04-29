@@ -1,4 +1,4 @@
-include nytcongress.py
+include congress.py
 include test.py
 include requirements.txt
-include README.md
+include README.*
