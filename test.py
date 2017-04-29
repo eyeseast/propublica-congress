@@ -99,7 +99,7 @@ class CommitteeTest(APITest):
 class NominationTest(APITest):
     
     def test_nomination_list(self):
-        parse = lambda r: r['results']
+        parse = lambda r: r['results'][0]
         received = self.congress.nominations.filter('received', 114)
         url = "https://api.propublica.org/congress/v1/114/nominees/received.json"
         self.check_response(received, url, parse=parse)
@@ -127,8 +127,8 @@ class NominationTest(APITest):
         self.check_response(nom_votes, url)
 
     def test_nominations_by_state(self):
-        parse = lambda r: r['results']
-        IL = self.congress.nominations.by_state('DE', 111)
+        parse = lambda r: r['results'][0]
+        IL = self.congress.nominations.by_state('IL', 114)
         url = "https://api.propublica.org/congress/v1/114/nominees/state/IL.json"
         self.check_response(IL, url, parse=parse)
 
