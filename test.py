@@ -137,7 +137,7 @@ class VoteTest(APITest):
     
     def test_votes_by_month(self):
         jan = self.congress.votes.by_month('house', 2016, 1)
-        url = "https://api.propublica.org/congress/v1/senate/votes/2016/01.json"
+        url = "https://api.propublica.org/congress/v1/house/votes/2016/01.json"
         self.check_response(jan, url, parse=lambda r: r['results'])
     
     def test_votes_by_date_range(self):
@@ -173,7 +173,7 @@ class VoteTest(APITest):
         self.check_response(vote, url, parse=lambda r: r['results'])
     
     def test_votes_by_type(self):
-        missed = self.congress.votes.by_type('house', 'missed', 111)
+        missed = self.congress.votes.by_type('house', 'missed', 114)
         url = "https://api.propublica.org/congress/v1/114/house/votes/missed.json"
         self.check_response(missed, url)
             
