@@ -121,7 +121,7 @@ class MembersClient(Client):
 
         else:
             path = "{congress}/{chamber}/members.json".format(**kwargs)
-        
+
         return self.fetch(path)
     
     def bills(self, member_id, type='introduced'):
@@ -140,14 +140,15 @@ class MembersClient(Client):
         path = "{0}/{1}/members/leaving.json".format(congress, chamber)
         return self.fetch(path)
     
-    def compare(self, first, second, chamber, congress=CURRENT_CONGRESS):
+    def compare(self, first, second, chamber, type='votes', congress=CURRENT_CONGRESS):
         """
         See how often two members voted together in a given Congress.
         Takes two member IDs, a chamber and a Congress number.
         """
         check_chamber(chamber)
-        path = "{first}/votes/{second}/{congress}/{chamber}.json"
-        path = path.format(first=first, second=second, congress=congress, chamber=chamber)
+        path = "members/{first}/{type}/{second}/{congress}/{chamber}.json"
+        path = path.format(first=first, second=second, 
+            type=type, congress=congress, chamber=chamber)
         return self.fetch(path)
 
     def party(self):

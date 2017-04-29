@@ -55,8 +55,9 @@ class MemberTest(APITest):
         first = "G000575"
         second = "D000624"
         chamber = "house"
+        type = "votes"
         congress = 114
-        comparison = self.congress.members.compare(first, second, chamber, congress)
+        comparison = self.congress.members.compare(first, second, chamber, type, congress)
         url = "https://api.propublica.org/congress/v1/members/G000575/votes/D000624/114/house.json"
         self.check_response(comparison, url)
         
