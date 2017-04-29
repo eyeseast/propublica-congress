@@ -51,10 +51,11 @@ class CongressError(Exception):
     """
     Exception for general Congress API errors
     """
-    def __init__(self, message, response=None):
+    def __init__(self, message, response=None, url=None):
         super(CongressError, self).__init__(message)
         self.message = message
         self.response = response
+        self.url = url
 
 
 class NotFound(CongressError):
@@ -88,7 +89,7 @@ class Client(object):
             if "errors" in content and content['errors'][0]['error'] == "Record not found":
                 raise NotFound(path)
 
-            raise CongressError(content)
+            raise CongressError(content, resp, url)
 
         if callable(parse):
             content = parse(content)
@@ -104,9 +105,23 @@ class MembersClient(Client):
         return self.fetch(path)
     
     def filter(self, chamber, congress=CURRENT_CONGRESS, **kwargs):
-        "Takes a chamber, Congress, and optional state and district, returning a list of members"
+        """
+        Takes a chamber and Congress, 
+        OR state and district, returning a list of members
+        """
         check_chamber(chamber)
-        path = "{0}/{1}/members.json".format(congress, chamber)
+
+        kwargs.update(chamber=chamber, congress=congress)
+
+        if 'state' in kwargs and 'district' in kwargs:
+            path = "members/{chamber}/{state}/{district}/current.json".format(**kwargs)
+
+        elif 'state' in kwargs:
+            path = "members/{chamber}/{state}/current.json".format(**kwargs)
+
+        else:
+            path = "{congress}/{chamber}/members.json".format(**kwargs)
+        
         return self.fetch(path)
     
     def bills(self, member_id, type='introduced'):
