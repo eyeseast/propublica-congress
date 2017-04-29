@@ -7,6 +7,12 @@ API <https://propublica.github.io/congress-api-docs/>`__
 Install
 -------
 
+From PyPI:
+
+::
+
+    pip install python-congress
+
 Download and run the install script:
 
 ::

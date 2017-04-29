@@ -6,6 +6,10 @@ A Python client for the ProPublica [Congress API](https://propublica.github.io/c
 Install
 -------
 
+From PyPI:
+
+    pip install python-congress
+
 Download and run the install script:
 
     git clone https://github.com/eyeseast/propublica-congress && cd propublica-congress
