@@ -9,7 +9,7 @@ except ImportError:
 with open('README.md') as f:
     README = f.read()
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 setup(
     name = "python-congress",
