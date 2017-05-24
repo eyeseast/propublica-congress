@@ -232,7 +232,7 @@ class DjangoTest(unittest.TestCase):
         
         try:
             bills = congress.bills.introduced('house')
-        except Exception, e:
+        except Exception as e:
             self.fail(e)
         
 
