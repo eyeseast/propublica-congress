@@ -8,6 +8,7 @@ __version__ = "0.2.0"
 
 import datetime
 import json
+import math
 import os
 import urllib
 
@@ -24,7 +25,7 @@ def get_congress(year):
     if year < 1789:
         raise CongressError('There was no Congress before 1789.')
 
-    return (year - 1789) / 2 + 1
+    return math.floor((year - 1789) / 2 + 1)
 
 def check_chamber(chamber):
     "Validate that chamber is house or senate"
