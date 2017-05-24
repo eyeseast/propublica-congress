@@ -9,7 +9,7 @@ import unittest
 
 import httplib2
 
-from congress import Congress, CongressError, NotFound, get_congress
+from congress import Congress, CongressError, NotFound, get_congress, u
 
 API_KEY = os.environ['PROPUBLICA_API_KEY']
 
@@ -17,7 +17,9 @@ class APITest(unittest.TestCase):
     
     def check_response(self, result, url, parse=lambda r: r['results'][0]):
         headers = {'X-API-Key': API_KEY}
-        response = json.loads(self.http.request(url, headers=headers)[1])
+        response = self.http.request(url, headers=headers)[1]
+        response = u(response)
+        response = json.loads(response)
         
         if callable(parse):
             response = parse(response)
@@ -232,7 +234,7 @@ class DjangoTest(unittest.TestCase):
         
         try:
             bills = congress.bills.introduced('house')
-        except Exception, e:
+        except Exception as e:
             self.fail(e)
         
 
