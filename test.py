@@ -30,6 +30,8 @@ class APITest(unittest.TestCase):
         self.congress = Congress(API_KEY)
         self.http = httplib2.Http()
 
+    def tearDown(self):
+        pass
     
 class MemberTest(APITest):
 

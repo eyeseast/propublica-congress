@@ -342,7 +342,7 @@ class NominationsClient(Client):
 
 class Congress(Client):
     """
-    Implements the public interface for the NYT Congress API
+    Implements the public interface for the ProPublica Congress API
     
     Methods are namespaced by topic (though some have multiple access points).
     Everything returns decoded JSON, with fat trimmed.
@@ -353,7 +353,7 @@ class Congress(Client):
     functions that add on your API key and trim fat off responses.
     
     Create a new instance with your API key, or set an environment
-    variable called NYT_CONGRESS_API_KEY.
+    variable called PROPUBLICA_API_KEY.
     
     Congress uses httplib2, and caching is pluggable. By default,
     it uses httplib2.FileCache, in a directory called .cache, but it
