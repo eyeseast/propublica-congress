@@ -19,7 +19,7 @@ setup(
     author = "Chris Amico",
     author_email = "eyeseast@gmail.com",
     py_modules = ['congress'],
-    install_requires = ['httplib2'],
+    install_requires = ['httplib2', 'six'],
     platforms= ['any'],
     classifiers = [
         "Intended Audience :: Developers",

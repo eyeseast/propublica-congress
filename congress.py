@@ -12,6 +12,7 @@ import os
 import urllib
 
 import httplib2
+import six
 
 __all__ = ('Congress', 'CongressError', 'NotFound', 'get_congress', 'CURRENT_CONGRESS')
 
@@ -42,6 +43,16 @@ def parse_date(s):
     except ImportError:
         parse = lambda d: datetime.datetime.strptime(d, "%Y-%m-%d")
     return parse(s)
+
+def u(text, encoding='utf-8'):
+    "Return unicode text, no matter what"
+
+    if isinstance(text, six.binary_type):
+        text = text.decode(encoding)
+
+    # it's already unicode
+    text = text.replace('\r\n', '\n')
+    return text
 
 CURRENT_CONGRESS = get_congress(datetime.datetime.now().year)
 
@@ -81,6 +92,7 @@ class Client(object):
         headers = {'X-API-Key': self.apikey}
 
         resp, content = self.http.request(url, headers=headers)
+        content = u(content)
         content = json.loads(content)
 
         # handle errors
