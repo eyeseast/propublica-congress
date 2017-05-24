@@ -13,6 +13,11 @@ from congress import Congress, CongressError, NotFound, get_congress, u
 
 API_KEY = os.environ['PROPUBLICA_API_KEY']
 
+def close_connections(http):
+    for k, conn in http.connections.items():
+        conn.close()
+
+
 class APITest(unittest.TestCase):
     
     def check_response(self, result, url, parse=lambda r: r['results'][0]):
@@ -31,7 +36,8 @@ class APITest(unittest.TestCase):
         self.http = httplib2.Http()
 
     def tearDown(self):
-        pass
+        close_connections(self.congress.http)
+        close_connections(self.http)
     
 class MemberTest(APITest):
 

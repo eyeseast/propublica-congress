@@ -81,9 +81,13 @@ class Client(object):
     
     BASE_URI = "https://api.propublica.org/congress/v1/"
     
-    def __init__(self, apikey=None, cache='.cache'):
+    def __init__(self, apikey=None, cache='.cache', http=None):
         self.apikey = apikey
-        self.http = httplib2.Http(cache)
+
+        if isinstance(http, httplib2.Http):
+            self.http = http
+        else:
+            self.http = httplib2.Http(cache)
     
     def fetch(self, path, parse=lambda r: r['results'][0]):
         """
@@ -361,12 +365,13 @@ class Congress(Client):
     same interface as FileCache (per httplib2 docs).
     """
     
-    def __init__(self, apikey=os.environ.get('PROPUBLICA_API_KEY'), cache='.cache'):
-        super(Congress, self).__init__(apikey, cache)
-        self.members = MembersClient(self.apikey, cache)
-        self.bills = BillsClient(self.apikey, cache)
-        self.committees = CommitteesClient(self.apikey, cache)
-        self.votes = VotesClient(self.apikey, cache)
-        self.nominations = NominationsClient(self.apikey, cache)
+    def __init__(self, apikey=os.environ.get('PROPUBLICA_API_KEY'), cache='.cache', http=None):
+        super(Congress, self).__init__(apikey, cache, http)
+
+        self.members = MembersClient(self.apikey, cache, self.http)
+        self.bills = BillsClient(self.apikey, cache, self.http)
+        self.committees = CommitteesClient(self.apikey, cache, self.http)
+        self.votes = VotesClient(self.apikey, cache, self.http)
+        self.nominations = NominationsClient(self.apikey, cache, self.http)
 
 
