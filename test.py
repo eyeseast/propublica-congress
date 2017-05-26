@@ -9,7 +9,8 @@ import unittest
 
 import httplib2
 
-from congress import Congress, CongressError, NotFound, get_congress, u
+from congress import Congress
+from congress.utils import CongressError, NotFound, get_congress, u
 
 API_KEY = os.environ['PROPUBLICA_API_KEY']
 
