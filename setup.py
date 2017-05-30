@@ -9,7 +9,7 @@ except ImportError:
 with open('README.rst') as f:
     README = f.read()
 
-VERSION = "0.3.2"
+VERSION = "0.3.3"
 
 setup(
     name = "python-congress",
