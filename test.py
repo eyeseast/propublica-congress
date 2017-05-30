@@ -50,7 +50,22 @@ class MemberTest(APITest):
     def test_filter_members(self):
         ri = self.congress.members.filter(chamber='senate', state='RI')
         url = "https://api.propublica.org/congress/v1/members/senate/RI/current.json"
-        self.check_response(ri, url)
+        self.check_response(ri, url, parse=lambda r: r['results'])
+
+        self.assertEqual(len(ri), 2)
+
+    def test_correct_member_counts(self):
+        "Check that congress.members.filter returns the right number of members"
+        # this may fail if membership changes, because it always gets current members
+        states = [
+            ('RI', 2),
+            ('AL', 7),
+            ('AZ', 9),
+        ]
+
+        for state, count in states:
+            members = self.congress.members.filter(chamber='house', state=state)
+            self.assertEqual(len(members), count)
     
     def test_new_members(self):
         new = self.congress.members.new()

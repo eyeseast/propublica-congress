@@ -27,7 +27,7 @@ class MembersClient(Client):
         else:
             path = "{congress}/{chamber}/members.json".format(**kwargs)
 
-        return self.fetch(path)
+        return self.fetch(path, parse=lambda r: r['results'])
     
     def bills(self, member_id, type='introduced'):
         "Same as BillsClient.by_member"
