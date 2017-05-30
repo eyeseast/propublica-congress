@@ -1,8 +1,6 @@
 API
 ===
 
-.. module:: congress
-
 Congress
 --------
 
@@ -11,7 +9,7 @@ Congress
 .. autoclass:: Congress
 
 Example: Using a custom cache object
-**************
+************************************
 
 Redis is a good option for a cache that can be shared between processes.
 
@@ -66,6 +64,6 @@ Nominations
 
 .. automodule:: congress.nominations
 
-.. automodule:: congress.nominations.NominationsClient
+.. autoclass:: congress.nominations.NominationsClient
     :members:
 

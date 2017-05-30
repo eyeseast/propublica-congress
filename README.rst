@@ -2,7 +2,7 @@ Python Congress
 ===============
 
 A Python client for the ProPublica `Congress
-API <https://propublica.github.io/congress-api-docs/>`__
+API <https://projects.propublica.org/api-docs/congress-api/>`__
 
 Install
 -------

@@ -7,7 +7,7 @@ Python Congress
 ===============
 
 A Python client for the ProPublica `Congress
-API <https://propublica.github.io/congress-api-docs/>`__
+API <https://projects.propublica.org/api-docs/congress-api/>`__
 
 Install
 -------
@@ -28,6 +28,11 @@ Download and run the install script:
 Usage
 -----
 
+The main entrypoint for the API is the ``Congress`` class, which is instantiated with your API key.
+(Request an API key at `ProPublica's data store <https://www.propublica.org/datastore/api/propublica-congress-api>`_.)
+
+Endpoints are organized into subclients attached to the main ``Congress`` instance. For example:
+
 ::
 
     >>> from congress import Congress
@@ -42,7 +47,7 @@ Usage
     # recent bills come in two types: 'introduced' and 'updated'
     >>> introd = congress.bills.recent(
     ...     chamber='house', 
-    ...     congress=111, 
+    ...     congress=115, 
     ...     type='introduced')
 
     >>> len(introd['bills'])
