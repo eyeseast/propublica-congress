@@ -1,3 +1,8 @@
+.. Python Congress documentation master file, created by
+   sphinx-quickstart on Sun May 28 21:04:36 2017.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
 Python Congress
 ===============
 
@@ -23,6 +28,11 @@ Download and run the install script:
 Usage
 -----
 
+The main entrypoint for the API is the ``Congress`` class, which is instantiated with your API key.
+(Request an API key at `ProPublica's data store <https://www.propublica.org/datastore/api/propublica-congress-api>`_.)
+
+Endpoints are organized into subclients attached to the main ``Congress`` instance. For example:
+
 ::
 
     >>> from congress import Congress
@@ -35,9 +45,14 @@ Usage
 
     # get recent House bills
     # recent bills come in two types: 'introduced' and 'updated'
-    >>> introd = congress.bills.recent(chamber='house', congress=111, type='introduced')
+    >>> introd = congress.bills.recent(
+    ...     chamber='house', 
+    ...     congress=115, 
+    ...     type='introduced')
+
     >>> len(introd['bills'])
     20
+    
     >>> introd['chamber']
     'House'
 
@@ -47,3 +62,20 @@ Usage
     'House'
     >>> len(introd['bills'])
     20
+
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   api
+
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

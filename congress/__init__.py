@@ -34,15 +34,18 @@ class Congress(Client):
     functions that add on your API key and trim fat off responses.
     
     Create a new instance with your API key, or set an environment
-    variable called PROPUBLICA_API_KEY.
+    variable called ``PROPUBLICA_API_KEY``.
     
-    Congress uses httplib2, and caching is pluggable. By default,
-    it uses httplib2.FileCache, in a directory called .cache, but it
-    should also work with memcache or anything else that exposes the
-    same interface as FileCache (per httplib2 docs).
+    Congress uses `httplib2 <https://github.com/httplib2/httplib2>`_, and caching is pluggable. By default,
+    it uses `httplib2.FileCache <https://httplib2.readthedocs.io/en/latest/libhttplib2.html#httplib2.FileCache>`_, 
+    in a directory called ``.cache``, but it should also work with memcache 
+    or anything else that exposes the same interface as FileCache (per httplib2 docs).
     """
     
-    def __init__(self, apikey=os.environ.get('PROPUBLICA_API_KEY'), cache='.cache', http=None):
+    def __init__(self, apikey=None, cache='.cache', http=None):
+        if apikey is None:
+            apikey = os.environ.get('PROPUBLICA_API_KEY')
+
         super(Congress, self).__init__(apikey, cache, http)
 
         self.bills = BillsClient(self.apikey, cache, self.http)
