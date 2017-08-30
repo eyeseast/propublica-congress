@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup, find_packages
 
 
 with open('README.rst') as f:
@@ -13,14 +10,14 @@ VERSION = "0.3.4"
 
 setup(
     name = "python-congress",
+    packages=find_packages(exclude=['docs']),
     version = VERSION,
     description = "A Python client for the ProPublica Congress API",
     long_description = README,
     author = "Chris Amico",
     author_email = "eyeseast@gmail.com",
-    py_modules = ['congress'],
+    url = 'https://github.com/eyeseast/propublica-congress',
     install_requires = ['httplib2', 'six'],
-    platforms= ['any'],
     classifiers = [
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
