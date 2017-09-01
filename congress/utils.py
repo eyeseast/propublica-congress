@@ -35,7 +35,7 @@ def get_congress(year):
     if year < 1789:
         raise CongressError('There was no Congress before 1789.')
 
-    return math.floor((year - 1789) / 2 + 1)
+    return int(math.floor((year - 1789) / 2 + 1))
 
 
 def parse_date(s):
