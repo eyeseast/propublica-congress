@@ -2,6 +2,7 @@
 
 import datetime
 import json
+import logging
 import os
 import time
 import urllib
@@ -13,6 +14,10 @@ from congress import Congress
 from congress.utils import CongressError, NotFound, get_congress, u
 
 API_KEY = os.environ['PROPUBLICA_API_KEY']
+LOG_LEVEL = getattr(logging, os.environ.get('CONGRESS_LOG_LEVEL', 'INFO').upper(), logging.INFO)
+
+logging.basicConfig(level=LOG_LEVEL)
+
 
 def close_connections(http):
     for k, conn in http.connections.items():
