@@ -2,9 +2,12 @@
 Base client outlining how we fetch and parse responses
 """
 import json
+import logging
 import httplib2
 
 from .utils import NotFound, CongressError, u
+
+log = logging.getLogger('congress')
 
 
 class Client(object):
@@ -42,6 +45,8 @@ class Client(object):
         url = self.BASE_URI + path
         headers = {'X-API-Key': self.apikey}
 
+        log.debug(url)
+        
         resp, content = self.http.request(url, headers=headers)
         content = u(content)
         content = json.loads(content)
