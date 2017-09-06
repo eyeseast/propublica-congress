@@ -57,6 +57,9 @@ class Client(object):
             if "errors" in content and content['errors'][0]['error'] == "Record not found":
                 raise NotFound(path)
 
+            if content.get('status') == '404':
+                raise NotFound(path)
+
             raise CongressError(content, resp, url)
 
         if callable(parse):

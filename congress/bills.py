@@ -56,3 +56,8 @@ class BillsClient(Client):
     def major(self, chamber, congress=CURRENT_CONGRESS):
         "Shortcut for major bills"
         return self.recent(chamber, congress, 'major')
+
+    def upcoming(self, chamber, congress=CURRENT_CONGRESS):
+        "Shortcut for upcoming bills"
+        path = "bills/upcoming/{chamber}.json".format(chamber=chamber)
+        return self.fetch(path)
