@@ -18,30 +18,31 @@ from .committees import CommitteesClient
 from .votes import VotesClient
 from .nominations import NominationsClient
 
+
 __all__ = ('Congress', 'CongressError', 'NotFound', 'get_congress', 'CURRENT_CONGRESS')
 
 
 class Congress(Client):
     """
     Implements the public interface for the ProPublica Congress API
-    
+
     Methods are namespaced by topic (though some have multiple access points).
     Everything returns decoded JSON, with fat trimmed.
-    
+
     In addition, the top-level namespace is itself a client, which
     can be used to fetch generic resources, using the API URIs included
     in responses. This is here so you don't have to write separate
     functions that add on your API key and trim fat off responses.
-    
+
     Create a new instance with your API key, or set an environment
     variable called ``PROPUBLICA_API_KEY``.
-    
+
     Congress uses `httplib2 <https://github.com/httplib2/httplib2>`_, and caching is pluggable. By default,
-    it uses `httplib2.FileCache <https://httplib2.readthedocs.io/en/latest/libhttplib2.html#httplib2.FileCache>`_, 
-    in a directory called ``.cache``, but it should also work with memcache 
+    it uses `httplib2.FileCache <https://httplib2.readthedocs.io/en/latest/libhttplib2.html#httplib2.FileCache>`_,
+    in a directory called ``.cache``, but it should also work with memcache
     or anything else that exposes the same interface as FileCache (per httplib2 docs).
     """
-    
+
     def __init__(self, apikey=None, cache='.cache', http=None):
         if apikey is None:
             apikey = os.environ.get('PROPUBLICA_API_KEY')
@@ -53,4 +54,3 @@ class Congress(Client):
         self.members = MembersClient(self.apikey, cache, self.http)
         self.nominations = NominationsClient(self.apikey, cache, self.http)
         self.votes = VotesClient(self.apikey, cache, self.http)
-
