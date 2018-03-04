@@ -6,7 +6,6 @@ import math
 import six
 
 
-
 class CongressError(Exception):
     """
     Exception for general Congress API errors

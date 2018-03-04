@@ -65,7 +65,7 @@ class MemberTest(APITest):
         states = [
             ('RI', 2),
             ('AL', 7),
-            ('AZ', 9),
+            ('AZ', 8),
         ]
 
         for state, count in states:

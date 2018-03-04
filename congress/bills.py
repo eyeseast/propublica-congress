@@ -3,15 +3,17 @@ from .utils import CURRENT_CONGRESS, check_chamber
 
 
 class BillsClient(Client):
-    
+
     def by_member(self, member_id, type='introduced'):
         """
-        Takes a bioguide ID and a type (introduced|updated|cosponsored|withdrawn), 
-        returns recent bills
+        Takes a bioguide ID and a type:
+        (introduced|updated|cosponsored|withdrawn)
+        Returns recent bills
         """
-        path = "members/{member_id}/bills/{type}.json".format(member_id=member_id, type=type)
+        path = "members/{member_id}/bills/{type}.json".format(
+            member_id=member_id, type=type)
         return self.fetch(path)
-    
+
     def get(self, bill_id, congress=CURRENT_CONGRESS, type=None):
         if type:
             path = "{congress}/bills/{bill_id}/{type}.json".format(
@@ -21,30 +23,34 @@ class BillsClient(Client):
                 congress=congress, bill_id=bill_id)
 
         return self.fetch(path)
-    
+
     def amendments(self, bill_id, congress=CURRENT_CONGRESS):
         return self.get(bill_id, congress, 'amendments')
 
     def related(self, bill_id, congress=CURRENT_CONGRESS):
         return self.get(bill_id, congress, 'related')
-    
+
     def subjects(self, bill_id, congress=CURRENT_CONGRESS):
         return self.get(bill_id, congress, 'subjects')
-    
+
     def cosponsors(self, bill_id, congress=CURRENT_CONGRESS):
         return self.get(bill_id, congress, 'cosponsors')
-    
+
     def recent(self, chamber, congress=CURRENT_CONGRESS, type='introduced'):
         check_chamber(chamber)
-        "Takes a chamber, Congress, and type (introduced|updated), returns a list of recent bills"
+        """
+        Takes a chamber, Congress, and type:
+        (introduced|updated)
+        Returns a list of recent bills
+        """
         path = "{congress}/{chamber}/bills/{type}.json".format(
             congress=congress, chamber=chamber, type=type)
         return self.fetch(path)
-    
+
     def introduced(self, chamber, congress=CURRENT_CONGRESS):
         "Shortcut for getting introduced bills"
         return self.recent(chamber, congress, 'introduced')
-    
+
     def updated(self, chamber, congress=CURRENT_CONGRESS):
         "Shortcut for getting updated bills"
         return self.recent(chamber, congress, 'updated')
