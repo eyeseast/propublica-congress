@@ -37,12 +37,12 @@ class BillsClient(Client):
         return self.get(bill_id, congress, 'cosponsors')
 
     def recent(self, chamber, congress=CURRENT_CONGRESS, type='introduced'):
-        check_chamber(chamber)
         """
         Takes a chamber, Congress, and type:
         (introduced|updated)
         Returns a list of recent bills
         """
+        check_chamber(chamber)
         path = "{congress}/{chamber}/bills/{type}.json".format(
             congress=congress, chamber=chamber, type=type)
         return self.fetch(path)
