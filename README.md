@@ -1,6 +1,11 @@
 Python Congress
 ==================
 
+This Fork
+---------
+
+This fork adds a method to access the recent votes end point of the API.
+
 A Python client for the ProPublica [Congress API](https://projects.propublica.org/api-docs/congress-api/)
 
 Install
