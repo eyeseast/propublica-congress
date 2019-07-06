@@ -4,6 +4,11 @@ from .utils import CURRENT_CONGRESS, check_chamber
 
 class MembersClient(Client):
 
+    def list_chamber(self, chamber,congress=CURRENT_CONGRESS):
+        "Takes a bioguide_id, returns a legislator"
+        path = "{congress}/{chamber}/members.json".format(congress=congress,chamber=chamber)
+        return self.fetch(path)
+
     def get(self, member_id):
         "Takes a bioguide_id, returns a legislator"
         path = "members/{0}.json".format(member_id)
