@@ -40,6 +40,12 @@ class VotesClient(Client):
         "Return votes cast in a chamber on a single day"
         date = parse_date(date)
         return self.by_range(chamber, date, date)
+    
+    def recent(self, chamber):
+        "Return recent roll call votes for a given chamber. Also helpful if trying to find current session."
+        check_chamber(chamber)
+        path = "{chamber}/votes/recent.json".format(chamber=chamber)
+        return self.fetch(path, parse=lambda r: r['results']) 
 
     def today(self, chamber):
         "Return today's votes in a given chamber"
